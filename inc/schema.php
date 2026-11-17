@@ -35,6 +35,9 @@ function schema_sql(string $driver): array
             FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE)$eng",
         "CREATE TABLE IF NOT EXISTS modeles_mail (
             code VARCHAR(30) PRIMARY KEY, libelle VARCHAR(120), sujet VARCHAR(255) NOT NULL, corps $txt NOT NULL)$eng",
+        "CREATE TABLE IF NOT EXISTS invitations (
+            id $pk, edition_id INT NOT NULL, mail VARCHAR(190) NOT NULL, date_envoi DATETIME,
+            FOREIGN KEY (edition_id) REFERENCES editions(id) ON DELETE CASCADE)$eng",
         "CREATE TABLE IF NOT EXISTS journal_mails (
             id $pk, date_envoi DATETIME, destinataire VARCHAR(190), sujet VARCHAR(255), corps $txt,
             statut VARCHAR(20), erreur VARCHAR(500))$eng",
@@ -91,6 +94,23 @@ Elle vient d'être transmise au participant suivant.
 Le résultat complet sera dévoilé à la fin du {edition}.
 
 Patrick"],
+        'invitation' => ['Invitation des anciens participants', 'Le {edition} commence : inscris-toi !',
+"Bonjour {prenom},
+
+Tu as participé à un précédent cadavre exquis photographique : merci encore !
+
+Une nouvelle édition se prépare : le {edition}.
+Le principe ne change pas : tu reçois la photo de la personne qui te précède, tu as {delai} jours pour créer une photo qui s'en inspire, et tout est dévoilé à la fin.
+
+Pour t'inscrire, c'est ici :
+{site}
+
+N'hésite pas à transmettre ce lien aux membres de ton club !
+
+À bientôt,
+Patrick
+
+(Tu reçois ce mail car tu as participé à une édition précédente. Si tu ne souhaites plus être invité, réponds simplement « stop ».)"],
         'fin' => ['Cadavre terminé', 'Le {edition} est terminé !',
 "Bonjour {prenom},
 
@@ -101,4 +121,16 @@ Le {edition} est terminé : merci pour ta participation !
 À très bientôt,
 Patrick"],
     ];
+}
+
+/** Crée les tables / modèles manquants (mises à jour sans relancer install.php). */
+function assurer_schema(): void
+{
+    foreach (schema_sql(cfg('db.driver')) as $sql) db()->exec($sql);
+    foreach (modeles_defaut() as $code => [$lib, $suj, $corps]) {
+        if (!qv('SELECT COUNT(*) FROM modeles_mail WHERE code = ?', [$code])) {
+            insert('modeles_mail', ['code' => $code, 'libelle' => $lib, 'sujet' => $suj, 'corps' => $corps]);
+        }
+    }
+    try { db()->exec('ALTER TABLE participants ADD COLUMN ne_plus_inviter INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
 }

@@ -22,7 +22,7 @@ function edition_admin(): ?array
 {
     start_session();
     if (!empty($_SESSION['edition_id']) && ($e = edition((int) $_SESSION['edition_id']))) return $e;
-    return q1('SELECT * FROM editions ORDER BY id DESC LIMIT 1');
+    return q1("SELECT * FROM editions WHERE nom <> 'Anciens participants' ORDER BY id DESC LIMIT 1");
 }
 
 function chaine(int $id): ?array { return q1('SELECT * FROM chaines WHERE id = ?', [$id]); }

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('mails.php' . ($code ? '#' . $code : ''));
 }
 
-$mods = q("SELECT * FROM modeles_mail ORDER BY CASE code WHEN 'bienvenue' THEN 1 WHEN 'a_toi' THEN 2 WHEN 'relance' THEN 3 WHEN 'merci' THEN 4 ELSE 5 END")->fetchAll();
+$mods = q("SELECT * FROM modeles_mail ORDER BY CASE code WHEN 'bienvenue' THEN 1 WHEN 'a_toi' THEN 2 WHEN 'relance' THEN 3 WHEN 'merci' THEN 4 WHEN 'invitation' THEN 6 ELSE 5 END")->fetchAll();
 $journal = q('SELECT * FROM journal_mails ORDER BY id DESC LIMIT 150')->fetchAll();
 $erreurs = (int) qv("SELECT COUNT(*) FROM journal_mails WHERE statut = 'erreur'");
 

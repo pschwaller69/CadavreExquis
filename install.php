@@ -11,12 +11,7 @@ $checks = [
 $msg = '';
 $deja = false;
 try {
-    foreach (schema_sql(cfg('db.driver')) as $sql) db()->exec($sql);
-    foreach (modeles_defaut() as $code => [$lib, $suj, $corps]) {
-        if (!qv('SELECT COUNT(*) FROM modeles_mail WHERE code = ?', [$code])) {
-            insert('modeles_mail', ['code' => $code, 'libelle' => $lib, 'sujet' => $suj, 'corps' => $corps]);
-        }
-    }
+    assurer_schema();
     $deja = (int) qv('SELECT COUNT(*) FROM admins') > 0;
     $checks['Connexion base de données'] = true;
 } catch (Throwable $e) {

@@ -88,7 +88,7 @@ table.liste img.mini { height: 46px; border-radius: 3px; display: block; }
 table.liste form { display: inline; }
 .filtre { max-width: 320px; margin-bottom: 10px; }
 .deux-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-.panneau { background: var(--fond2); border: 1px solid var(--ligne); border-radius: 10px; padding: 16px; }
+.panneau { align-content: start; background: var(--fond2); border: 1px solid var(--ligne); border-radius: 10px; padding: 16px; }
 .base-photo { max-height: 160px; border-radius: 4px; }
 @media (max-width: 900px) { .deux-col { grid-template-columns: 1fr; } }
 

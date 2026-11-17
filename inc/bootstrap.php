@@ -155,6 +155,12 @@ function require_admin(): array
 {
     $a = admin();
     if (!$a) redirect(url('admin/login.php'));
+    $v = @filemtime(__DIR__ . '/schema.php');
+    if (($_SESSION['schema_v'] ?? 0) !== $v) {
+        require_once __DIR__ . '/schema.php';
+        assurer_schema();
+        $_SESSION['schema_v'] = $v;
+    }
     return $a;
 }
 
