@@ -350,3 +350,21 @@ function envoyer_points_attente(array $ed, bool $force = false): int
     }
     return $n;
 }
+
+/**
+ * Supprime une chaîne terminée, ses maillons et ses photos.
+ * $avec_participants : supprime aussi les participants qui n'étaient que dans cette chaîne (essais).
+ */
+function supprimer_chaine(array $ch, bool $avec_participants = true): void
+{
+    if ($ch['statut'] !== 'close') throw new RuntimeException('Terminez d\'abord la chaîne avant de la supprimer.');
+    $pids = q('SELECT DISTINCT participant_id FROM maillons WHERE chaine_id = ?', [$ch['id']])->fetchAll(PDO::FETCH_COLUMN);
+    q('DELETE FROM maillons WHERE chaine_id = ?', [$ch['id']]);
+    q('DELETE FROM chaines WHERE id = ?', [$ch['id']]);
+    foreach ($pids as $pid) {
+        if (qv('SELECT COUNT(*) FROM maillons WHERE participant_id = ?', [$pid])) continue; // aussi dans une autre chaîne
+        if ($avec_participants) q('DELETE FROM participants WHERE id = ?', [$pid]);
+        else update('participants', (int) $pid, ['statut' => 'abandon']);
+    }
+    supprimer_dossier(PHOTO_DIR . '/' . (int) $ch['edition_id'] . '/' . basename($ch['numero']));
+}

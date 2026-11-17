@@ -54,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 update('chaines', (int) $ch['id'], ['statut' => 'close']);
                 flash('Chaîne terminée (le participant en cours peut encore déposer sa photo).');
                 break;
+            case 'supprimer':
+                supprimer_chaine($ch, (bool) post('avec_participants'));
+                flash('Chaîne ' . $ch['numero'] . ' supprimée.');
+                redirect('index.php');
             case 'rouvrir':
                 update('chaines', (int) $ch['id'], ['statut' => 'active']);
                 avancer_chaine((int) $ch['id']);
@@ -81,6 +85,10 @@ entete('Chaîne ' . $ch['numero'], 'index');
     <form method="post" onsubmit="return confirm('Terminer cette chaîne ?')"><?= csrf_field() ?><input type="hidden" name="action" value="fermer"><button class="btn sec">■ Terminer la chaîne</button></form>
   <?php else: ?>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="rouvrir"><button class="btn sec">↺ Rouvrir</button></form>
+    <form method="post" class="actions" style="margin:0" onsubmit="return confirm('Supprimer définitivement la chaîne <?= h($ch['numero']) ?> et ses photos ?')"><?= csrf_field() ?>
+      <input type="hidden" name="action" value="supprimer">
+      <label class="case" style="font-size:13px"><input type="checkbox" name="avec_participants" value="1" checked> et ses participants</label>
+      <button class="btn danger">✕ Supprimer la chaîne</button></form>
   <?php endif ?>
 </div>
 

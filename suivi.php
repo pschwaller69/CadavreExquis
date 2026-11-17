@@ -6,10 +6,11 @@
 require __DIR__ . '/inc/bootstrap.php';
 header('Cache-Control: no-store');
 
-$editions = q("SELECT * FROM editions WHERE nom <> 'Anciens participants' AND statut <> 'preparation' ORDER BY id DESC")->fetchAll();
+// Uniquement ce qui est en cours : éditions en cours, chaînes non terminées
+$editions = q("SELECT * FROM editions WHERE nom <> 'Anciens participants' AND statut = 'en_cours' ORDER BY id DESC")->fetchAll();
 $ed = null;
 if (get('e') !== '') foreach ($editions as $e) if ((int) $e['id'] === (int) get('e')) $ed = $e;
-$ed ??= $editions[0] ?? q1("SELECT * FROM editions WHERE nom <> 'Anciens participants' ORDER BY id DESC LIMIT 1");
+$ed ??= $editions[0] ?? null;
 
 $stats = $chaines = $clubs = [];
 $semaines = [];
@@ -32,7 +33,7 @@ if ($ed) {
     ];
 
     $max = 1;
-    foreach (q('SELECT * FROM chaines WHERE edition_id = ? ORDER BY numero', [$eid])->fetchAll() as $ch) {
+    foreach (q("SELECT * FROM chaines WHERE edition_id = ? AND statut <> 'close' ORDER BY numero", [$eid])->fetchAll() as $ch) {
         $ms = q('SELECT statut, date_envoi, date_limite, date_retour FROM maillons WHERE chaine_id = ? ORDER BY position', [$ch['id']])->fetchAll();
         $r = array_values(array_filter($ms, fn($m) => $m['statut'] === 'rendu'));
         $cours = array_values(array_filter($ms, fn($m) => $m['statut'] === 'en_cours'))[0] ?? null;
@@ -91,7 +92,8 @@ $max_sem = max(1, ...array_values($semaines ?: [0]));
 <h1>Cadavre Exquis <span>Photographique</span></h1>
 
 <?php if (!$ed): ?>
-  <p>Aucune édition pour le moment.</p>
+  <p>Aucun cadavre exquis en cours pour le moment.</p>
+  <?php if ($ins = edition_inscriptions()): ?><p>Les inscriptions au <?= h($ins['nom']) ?> sont ouvertes : <a href="./">s'inscrire</a>.</p><?php endif ?>
 <?php else: ?>
   <?php if (count($editions) > 1): ?>
     <p class="petit">Édition : <?php foreach ($editions as $e): ?>
@@ -113,7 +115,8 @@ $max_sem = max(1, ...array_values($semaines ?: [0]));
     <div class="chiffre"><b><?= $stats['semaine'] ?></b><span>photos ces 7 derniers jours</span></div>
   </div>
 
-  <h2>Les chaînes</h2>
+  <h2>Les chaînes en cours</h2>
+  <?php if (!$chaines): ?><p class="petit">Toutes les chaînes sont terminées.</p><?php endif ?>
   <?php foreach ($chaines as $c): ?>
     <div class="chaine">
       <div class="num"><?= h($c['numero']) ?></div>

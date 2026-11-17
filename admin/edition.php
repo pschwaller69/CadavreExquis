@@ -24,6 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('Édition « ' . $ed['nom'] . ' » supprimée avec ses participants et ses photos.');
             redirect('index.php');
         }
+        if (post('action') === 'supprimer_chaine' && $ed) {
+            $ch = chaine((int) post('chaine'));
+            if (!$ch || (int) $ch['edition_id'] !== (int) $ed['id']) throw new RuntimeException('Chaîne introuvable.');
+            supprimer_chaine($ch, true);
+            flash('Chaîne ' . $ch['numero'] . ' supprimée avec ses participants et ses photos.');
+            redirect('edition.php');
+        }
         if (post('action') === 'ajout_chaine' && $ed) {
             $max = (int) qv('SELECT COALESCE(MAX(numero + 0),0) FROM chaines WHERE edition_id = ?', [$ed['id']]);
             insert('chaines', ['edition_id' => $ed['id'], 'numero' => sprintf('%02d', $max + 1), 'statut' => 'attente', 'attente_depuis' => now()]);
@@ -93,7 +100,16 @@ entete($nouvelle ? 'Nouvelle édition' : 'Édition', 'edition');
 <?php if (!$nouvelle): ?>
 <div class="panneau">
   <h2 style="margin-top:0">Chaînes (<?= count($chaines) ?>)</h2>
-  <p><?php foreach ($chaines as $c): ?><a href="chaine.php?id=<?= $c['id'] ?>">Chaîne <?= h($c['numero']) ?></a> <?= badge($c['statut']) ?><br><?php endforeach ?></p>
+  <table class="liste" style="margin-bottom:12px">
+  <?php foreach ($chaines as $c): ?>
+    <tr><td><a href="chaine.php?id=<?= $c['id'] ?>">Chaîne <?= h($c['numero']) ?></a></td><td><?= badge($c['statut']) ?></td>
+      <td style="text-align:right"><?php if ($c['statut'] === 'close'): ?>
+        <form method="post" onsubmit="return confirm('Supprimer la chaîne <?= h($c['numero']) ?>, ses participants et ses photos ?')"><?= csrf_field() ?>
+          <input type="hidden" name="action" value="supprimer_chaine"><input type="hidden" name="chaine" value="<?= $c['id'] ?>"><button class="btn petit danger">✕ Supprimer</button></form>
+      <?php endif ?></td></tr>
+  <?php endforeach ?>
+  </table>
+  <p class="petit">Seules les chaînes terminées peuvent être supprimées (bouton « Terminer la chaîne » sur sa page).</p>
   <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="ajout_chaine"><button class="btn sec">+ Ajouter une chaîne</button></form>
   <h2>Supprimer cette édition</h2>
   <form method="post" class="form" onsubmit="return confirm('Supprimer définitivement cette édition, ses participants et ses photos ?')"><?= csrf_field() ?>
