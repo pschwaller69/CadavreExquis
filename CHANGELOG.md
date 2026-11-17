@@ -3,6 +3,9 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.3.1 – 17/11/2026
+- Remplacement des dernières mentions de cadavre.ascs.fr par cadavreexquis.schwaller.art (README, cron)
+
 ## 1.3.0 – 17/11/2026
 - Numéro de version affiché dans l'admin, sur la page de connexion et dans `version.php`
 - Commit et date du déploiement écrits automatiquement par `.cpanel.yml`

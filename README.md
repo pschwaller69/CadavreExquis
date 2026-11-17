@@ -31,32 +31,34 @@ import CSV, harmonisation des noms de clubs, export CSV et zip des originaux, pl
 3. Limite Gmail : environ 500 mails par jour, ce qui est largement suffisant.
 
 ### 2. cPanel o2switch
-1. **Domaines** : créez le sous-domaine `cadavre.ascs.fr` (dossier par ex. `cadavre.ascs.fr`).
+1. **Domaines** : créez le sous-domaine `cadavreexquis.schwaller.art` (dossier par ex. `cadavreexquis.schwaller.art`).
    Vérifiez que le certificat SSL est actif (AutoSSL / Let's Encrypt).
 2. **Bases de données MySQL** : créez une base, un utilisateur, et donnez-lui tous les privilèges sur la base.
-3. **Gestionnaire de fichiers** : envoyez le zip dans le dossier du sous-domaine et extrayez-le.
+3. **Git Version Control** : clonez `https://github.com/pschwaller69/CadavreExquis`, puis « Update from Remote »
+   et « Deploy HEAD Commit » (le fichier `.cpanel.yml` copie les fichiers dans le dossier du sous-domaine).
+   Même manipulation à chaque mise à jour ; la version déployée s'affiche dans l'admin et sur `/version.php`.
 4. Copiez `config.sample.php` en `config.php` et remplissez : `base_url`, la base MySQL, le bloc `mail`
    (adresse Gmail + mot de passe d'application), `mail.admin`, et changez `cron_key`.
-5. Ouvrez `https://cadavre.ascs.fr/install.php` : contrôles, création des tables et du premier compte admin.
+5. Ouvrez `https://cadavreexquis.schwaller.art/install.php` : contrôles, création des tables et du premier compte admin.
 6. **Supprimez `install.php`.**
-7. Vérifiez que `https://cadavre.ascs.fr/data/photos/` et `https://cadavre.ascs.fr/config.php` répondent « 403 Forbidden ».
+7. Vérifiez que `https://cadavreexquis.schwaller.art/data/photos/` et `https://cadavreexquis.schwaller.art/config.php` répondent « 403 Forbidden ».
 
 ### 3. Tâche cron (relances et alertes)
 cPanel > **Tâches Cron**, une fois par jour, par exemple à 9h :
 ```
-0 9 * * * /usr/local/bin/php /home/VOTRE_COMPTE/cadavre.ascs.fr/cron.php
+0 9 * * * /usr/local/bin/php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php
 ```
-(Si la ligne de commande n'est pas possible : `https://cadavre.ascs.fr/cron.php?key=VOTRE_CLE`.)
+(Si la ligne de commande n'est pas possible : `https://cadavreexquis.schwaller.art/cron.php?key=VOTRE_CLE`.)
 
 ### 4. Tester les mails
 Admin > **Mails** > « M'envoyer un test ». En cas d'échec, l'erreur s'affiche dans le journal en bas de page.
-Si o2switch bloquait la connexion SMTP vers Gmail, créez une boîte `cadavre@ascs.fr` dans cPanel et
-mettez ses paramètres SMTP (`mail.ascs.fr`, port 465, `ssl`) dans `config.php`.
+Si o2switch bloquait la connexion SMTP vers Gmail, créez une boîte `cadavre@schwaller.art` dans cPanel et
+mettez ses paramètres SMTP (`mail.schwaller.art`, port 465, `ssl`) dans `config.php`.
 
 ## Déroulement d'une édition
 1. **Édition** > nouvelle édition : nom, nombre de chaînes (6), photo de départ, date de dernier envoi
    ou nombre maximum de photos par chaîne.
-2. Diffusez le lien `https://cadavre.ascs.fr` aux clubs. Les inscrits arrivent en liste d'attente.
+2. Diffusez le lien `https://cadavreexquis.schwaller.art` aux clubs. Les inscrits arrivent en liste d'attente.
 3. **Tableau de bord** > « Démarrer l'édition » : chaque chaîne reçoit son premier participant.
 4. Ensuite tout s'enchaîne seul. Sur le tableau de bord, vous voyez les vignettes de chaque chaîne,
    qui est en cours et les retards. Sur la page d'une chaîne : relancer, prolonger, passer, déposer

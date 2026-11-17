@@ -2,8 +2,8 @@
 /*
  * Tâche quotidienne : relances, alertes de retard, passage automatique, réparation des chaînes.
  * cPanel o2switch > Tâches Cron, une fois par jour (ex. 9h00) :
- *   php /home/VOTRE_COMPTE/cadavre.ascs.fr/cron.php
- * ou par URL : https://cadavre.ascs.fr/cron.php?key=VOTRE_CLE
+ *   php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php
+ * ou par URL : https://cadavreexquis.schwaller.art/cron.php?key=VOTRE_CLE
  */
 require __DIR__ . '/inc/bootstrap.php';
 
