@@ -3,6 +3,10 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.4.1 – 17/11/2026
+- La redirection vers la connexion ne dépend plus de base_url
+- Alerte dans l'admin et à l'installation si base_url (config.php) ne correspond pas à l'adresse du site
+
 ## 1.4.0 – 17/11/2026
 - Mail « point sur la file d'attente » : nombre de personnes avant soi + estimation indicative,
   envoyé automatiquement tous les 14 jours (`point_attente_jours`) et via un bouton du tableau de bord

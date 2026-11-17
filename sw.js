@@ -1,7 +1,7 @@
 // Service worker : rend l'application installable et affiche une page hors ligne.
 // Les pages et les photos viennent toujours du serveur (données à jour, accès protégé) ;
 // seuls les fichiers statiques sont mis en cache.
-const VERSION = 'cx-1.4.0'; // suivre APP_VERSION (inc/version.php)
+const VERSION = 'cx-1.4.1'; // suivre APP_VERSION (inc/version.php)
 const STATIQUES = ['assets/style.css', 'assets/icons/icon-192.png', 'assets/icons/favicon.png', 'offline.html'];
 
 self.addEventListener('install', e => {

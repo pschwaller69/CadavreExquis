@@ -33,6 +33,7 @@ if (!$deja && $_SERVER['REQUEST_METHOD'] === 'POST' && $checks['Connexion base d
 <body class="public"><main class="carte">
 <h1>Installation du Cadavre Exquis</h1>
 <ul class="checks"><?php foreach ($checks as $k => $ok): ?><li class="<?= $ok ? 'ok' : 'ko' ?>"><?= $ok ? '✔' : '✘' ?> <?= h($k) ?></li><?php endforeach ?></ul>
+<?= alerte_base_url() ?>
 <?php if ($msg): ?><p class="alerte ko"><?= h($msg) ?></p><?php endif ?>
 <?php if ($deja): ?>
   <p class="alerte ok">L'application est installée (tables à jour). <strong>Supprimez install.php du serveur.</strong></p>

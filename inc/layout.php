@@ -23,6 +23,7 @@ function entete(string $titre, string $actif = ''): void
   </div>
 </header>
 <main>
+<?= alerte_base_url() ?>
 <?php foreach (flash() as [$type, $msg]): ?><p class="alerte <?= $type ?>"><?= h($msg) ?></p><?php endforeach;
 }
 

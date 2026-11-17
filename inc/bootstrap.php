@@ -105,6 +105,16 @@ function start_session(): void
     session_start();
 }
 
+/** Message si base_url (config.php) ne correspond pas à l'adresse utilisée. */
+function alerte_base_url(): string
+{
+    $hote_cfg = parse_url((string) cfg('base_url'), PHP_URL_HOST);
+    $hote = $_SERVER['HTTP_HOST'] ?? '';
+    if (!$hote || !$hote_cfg || strcasecmp($hote_cfg, preg_replace('/:\d+$/', '', $hote)) === 0) return '';
+    return '<p class="alerte ko"><strong>config.php :</strong> base_url vaut « ' . h(cfg('base_url')) . ' » alors que le site est ouvert sur « '
+        . h($hote) . ' ». Les liens des mails et les redirections sont faux : corrigez base_url (ex. https://' . h($hote) . ').</p>';
+}
+
 /** Balises <head> pour l'application installable (PWA). */
 function pwa_head(): string
 {
@@ -154,7 +164,7 @@ function admin(): ?array
 function require_admin(): array
 {
     $a = admin();
-    if (!$a) redirect(url('admin/login.php'));
+    if (!$a) redirect('login.php'); // relatif : fonctionne même si base_url est faux
     $v = @filemtime(__DIR__ . '/schema.php');
     if (($_SESSION['schema_v'] ?? 0) !== $v) {
         require_once __DIR__ . '/schema.php';

@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Connexion – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head() ?>
 <body class="public"><main class="carte" style="max-width:380px">
 <h1>Cadavre <span>Exquis</span></h1>
+<?= alerte_base_url() ?>
 <?php if (get('installe')): ?><p class="alerte ok">Compte créé. Pensez à supprimer install.php.</p><?php endif ?>
 <?php if ($err): ?><p class="alerte ko"><?= h($err) ?></p><?php endif ?>
 <form method="post" class="form"><?= csrf_field() ?>
