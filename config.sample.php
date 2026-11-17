@@ -2,7 +2,7 @@
 // Copier ce fichier en config.php et l'adapter.
 return [
     // URL publique de l'application, sans / final
-    'base_url' => 'https://cadavre.ascs.fr',
+    'base_url' => 'https://cadavreexquis.schwaller.art',
 
     // Base de données : 'mysql' (o2switch) ou 'sqlite' (tests)
     'db' => [
@@ -37,7 +37,7 @@ return [
     'upload_max_mo'      => 30,
     'reduite_px'         => 2000, // plus grand côté de la version réduite (envoyée au suivant / projection)
 
-    // Clé pour lancer cron.php par URL (https://.../cron.php?key=...) si pas de cron en ligne de commande
+    // Clé pour lancer cron.php par URL (https://cadavreexquis.schwaller.art/cron.php?key=...) si pas de cron en ligne de commande
     'cron_key'           => 'changer-cette-cle-' . 'aleatoire',
 
     'timezone'           => 'Europe/Paris',

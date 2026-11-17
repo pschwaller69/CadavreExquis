@@ -4,3 +4,4 @@ config.php
 data/*.sqlite
 data/photos/*
 !data/photos/.gitkeep
+data/sessions/

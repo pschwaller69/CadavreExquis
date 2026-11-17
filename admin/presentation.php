@@ -22,6 +22,7 @@ foreach ($chaines as $ch) {
 }
 $n = count($pages);
 ?><!doctype html><html lang="fr"><meta charset="utf-8">
+<?= pwa_head() ?>
 <title>Présentation – <?= h($ed['nom']) ?></title>
 <style>
   @page { size: A4 landscape; margin: 0; }

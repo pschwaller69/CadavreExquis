@@ -30,7 +30,7 @@ $ch = $m ? chaine((int) $m['chaine_id']) : null;
 $ed = $ch ? edition((int) $ch['edition_id']) : null;
 $prec = $m ? photo_precedente($m) : null;
 ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cadavre Exquis – Dépôt</title><link rel="stylesheet" href="assets/style.css">
+<title>Cadavre Exquis – Dépôt</title><link rel="stylesheet" href="assets/style.css"><?= pwa_head() ?>
 <body class="public"><main class="carte large">
 <h1>Cadavre Exquis <span>Photographique</span></h1>
 

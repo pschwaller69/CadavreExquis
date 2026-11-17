@@ -7,7 +7,7 @@ function entete(string $titre, string $actif = ''): void
     $menu = ['index' => 'Tableau de bord', 'participants' => 'Participants', 'edition' => 'Édition',
              'mails' => 'Mails', 'admins' => 'Administrateurs'];
     ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= h($titre) ?> – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css">
+<title><?= h($titre) ?> – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css"><?= pwa_head() ?>
 <body class="admin">
 <header class="barre">
   <a class="logo" href="index.php">Cadavre <span>Exquis</span></a>

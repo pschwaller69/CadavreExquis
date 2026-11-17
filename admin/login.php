@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $err = 'Identifiant ou mot de passe incorrect.';
 }
 ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Connexion – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css">
+<title>Connexion – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css"><?= pwa_head() ?>
 <body class="public"><main class="carte" style="max-width:380px">
 <h1>Cadavre <span>Exquis</span></h1>
 <?php if (get('installe')): ?><p class="alerte ok">Compte créé. Pensez à supprimer install.php.</p><?php endif ?>

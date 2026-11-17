@@ -23,7 +23,7 @@ if ($ed && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $clubs = q("SELECT club, COUNT(*) n FROM participants WHERE club IS NOT NULL AND club <> '' GROUP BY club ORDER BY club")->fetchAll(PDO::FETCH_COLUMN);
 ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Inscription – Cadavre Exquis Photographique</title><link rel="stylesheet" href="assets/style.css">
+<title>Inscription – Cadavre Exquis Photographique</title><link rel="stylesheet" href="assets/style.css"><?= pwa_head() ?>
 <body class="public"><main class="carte">
 <h1>Cadavre Exquis <span>Photographique</span></h1>
 

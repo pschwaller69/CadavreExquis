@@ -95,9 +95,31 @@ function club_propre(string $s): string { return trim(preg_replace('/\s+/', ' ',
 function start_session(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) return;
+    // Sessions de 30 jours, dans un dossier propre à l'appli : on reste connecté dans l'appli installée sur le téléphone
+    $dir = DATA_DIR . '/sessions';
+    if (!is_dir($dir)) @mkdir($dir, 0700, true);
+    if (is_writable($dir)) session_save_path($dir);
+    ini_set('session.gc_maxlifetime', (string) (30 * 86400));
     session_name('cadavre');
-    session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => !empty($_SERVER['HTTPS'])]);
+    session_set_cookie_params(['lifetime' => 30 * 86400, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => !empty($_SERVER['HTTPS'])]);
     session_start();
+}
+
+/** Balises <head> pour l'application installable (PWA). */
+function pwa_head(): string
+{
+    $b = h(rtrim(cfg('base_url'), '/'));
+    return <<<HTML
+<link rel="manifest" href="$b/manifest.webmanifest">
+<meta name="theme-color" content="#17171f">
+<link rel="icon" type="image/png" href="$b/assets/icons/favicon.png">
+<link rel="apple-touch-icon" href="$b/assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Cadavre Exquis">
+<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('$b/sw.js', {scope: '$b/'}));</script>
+HTML;
 }
 function csrf(): string
 {

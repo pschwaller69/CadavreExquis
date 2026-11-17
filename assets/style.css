@@ -91,3 +91,24 @@ table.liste form { display: inline; }
 .panneau { background: var(--fond2); border: 1px solid var(--ligne); border-radius: 10px; padding: 16px; }
 .base-photo { max-height: 160px; border-radius: 4px; }
 @media (max-width: 900px) { .deux-col { grid-template-columns: 1fr; } }
+
+/* ---------- téléphone (application installée) */
+@media (max-width: 760px) {
+  .admin header.barre { padding: 8px 12px; gap: 8px; }
+  .admin header nav { order: 3; width: 100%; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin header nav a { white-space: nowrap; padding: 6px 9px; }
+  .admin header .droite { gap: 8px; }
+  .admin header .droite > span { display: none; }
+  .admin main { padding: 14px 12px; }
+  .admin h1 { font-size: 19px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat b { font-size: 20px; }
+  .grille-chaines { grid-template-columns: 1fr; }
+  table.liste { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+  table.liste td { white-space: normal; min-width: 90px; }
+  .actions .btn { padding: 8px 12px; }
+  .form .ligne { grid-template-columns: 1fr; }
+}
+@media (display-mode: standalone) {
+  body.public { padding-top: 16px; }
+}

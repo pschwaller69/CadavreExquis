@@ -34,7 +34,7 @@ if (!$deja && $_SERVER['REQUEST_METHOD'] === 'POST' && $checks['Connexion base d
     }
 }
 ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Installation</title><link rel="stylesheet" href="assets/style.css">
+<title>Installation</title><link rel="stylesheet" href="assets/style.css"><?= pwa_head() ?>
 <body class="public"><main class="carte">
 <h1>Installation du Cadavre Exquis</h1>
 <ul class="checks"><?php foreach ($checks as $k => $ok): ?><li class="<?= $ok ? 'ok' : 'ko' ?>"><?= $ok ? '✔' : '✘' ?> <?= h($k) ?></li><?php endforeach ?></ul>
