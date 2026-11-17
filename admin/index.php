@@ -57,6 +57,9 @@ entete('Tableau de bord', 'index');
 ?>
 <h1><?= h($ed['nom']) ?> <?= badge($ed['statut']) ?> <?= $ed['inscriptions_ouvertes'] ? badge('active', 'inscriptions ouvertes') : '' ?></h1>
 
+<?php if (!$ed['photo_base']): ?>
+  <p class="alerte info">Pas encore de photo de départ : <a href="edition.php#photo">ajoutez-la dans Édition</a> (elle est nécessaire pour démarrer).</p>
+<?php endif ?>
 <div class="actions">
   <?php if ($ed['statut'] !== 'terminee'): ?>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="demarrer">

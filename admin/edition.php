@@ -11,6 +11,19 @@ $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     try {
+        if (post('action') === 'supprimer' && $ed) {
+            if (post('confirmation') !== $ed['nom']) throw new RuntimeException('Suppression annulée : le nom saisi ne correspond pas.');
+            $ids = q('SELECT id FROM chaines WHERE edition_id = ?', [$ed['id']])->fetchAll(PDO::FETCH_COLUMN);
+            if ($ids) q('DELETE FROM maillons WHERE chaine_id IN (' . implode(',', array_map('intval', $ids)) . ')');
+            q('DELETE FROM chaines WHERE edition_id = ?', [$ed['id']]);
+            q('DELETE FROM invitations WHERE edition_id = ?', [$ed['id']]);
+            q('DELETE FROM participants WHERE edition_id = ?', [$ed['id']]);
+            q('DELETE FROM editions WHERE id = ?', [$ed['id']]);
+            supprimer_dossier(PHOTO_DIR . '/' . (int) $ed['id']);
+            unset($_SESSION['edition_id']);
+            flash('Édition « ' . $ed['nom'] . ' » supprimée avec ses participants et ses photos.');
+            redirect('index.php');
+        }
         if (post('action') === 'ajout_chaine' && $ed) {
             $max = (int) qv('SELECT COALESCE(MAX(numero + 0),0) FROM chaines WHERE edition_id = ?', [$ed['id']]);
             insert('chaines', ['edition_id' => $ed['id'], 'numero' => sprintf('%02d', $max + 1), 'statut' => 'attente', 'attente_depuis' => now()]);
@@ -65,7 +78,7 @@ entete($nouvelle ? 'Nouvelle édition' : 'Édition', 'edition');
     <label>Année<input name="annee" type="number" value="<?= h($v['annee']) ?>"></label>
   </div>
   <?php if ($nouvelle): ?><label>Nombre de chaînes<input name="nb_chaines" type="number" min="1" max="30" value="6"></label><?php endif ?>
-  <label>Photo de départ (commune à toutes les chaînes)
+  <label id="photo">Photo de départ (commune à toutes les chaînes)<?= $v['photo_base'] ? ' – choisir un fichier pour la remplacer' : '' ?>
     <?php if ($v['photo_base']): ?><img class="base-photo" src="../img.php?base=<?= $ed['id'] ?>"><?php endif ?>
     <input type="file" name="photo_base" accept="image/*"></label>
   <div class="ligne">
@@ -82,6 +95,13 @@ entete($nouvelle ? 'Nouvelle édition' : 'Édition', 'edition');
   <h2 style="margin-top:0">Chaînes (<?= count($chaines) ?>)</h2>
   <p><?php foreach ($chaines as $c): ?><a href="chaine.php?id=<?= $c['id'] ?>">Chaîne <?= h($c['numero']) ?></a> <?= badge($c['statut']) ?><br><?php endforeach ?></p>
   <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="ajout_chaine"><button class="btn sec">+ Ajouter une chaîne</button></form>
+  <h2>Supprimer cette édition</h2>
+  <form method="post" class="form" onsubmit="return confirm('Supprimer définitivement cette édition, ses participants et ses photos ?')"><?= csrf_field() ?>
+    <input type="hidden" name="action" value="supprimer">
+    <p class="petit" style="margin:0">Pour effacer un essai. Tapez le nom exact de l'édition (« <?= h($ed['nom']) ?> ») pour confirmer. Aucun mail n'est envoyé.</p>
+    <input name="confirmation" placeholder="<?= h($ed['nom']) ?>" autocomplete="off">
+    <button class="btn danger">Supprimer l'édition</button>
+  </form>
   <h2>Fonctionnement automatique</h2>
   <ul class="petit">
     <li>À l'inscription : mail de bienvenue, puis placement immédiat si une chaîne attend quelqu'un.</li>

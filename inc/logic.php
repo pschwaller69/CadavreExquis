@@ -55,6 +55,15 @@ function chemin_photo(?string $rel): ?string
     return is_file($p) ? $p : null;
 }
 
+function supprimer_dossier(string $dir): void
+{
+    if (!is_dir($dir) || !str_starts_with(realpath($dir), realpath(PHOTO_DIR))) return;
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $f) {
+        $f->isDir() ? rmdir($f->getPathname()) : unlink($f->getPathname());
+    }
+    rmdir($dir);
+}
+
 function nom_fichier(string $s): string
 {
     $s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s) ?: $s;

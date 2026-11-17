@@ -3,6 +3,10 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.5.0 – 17/11/2026
+- Rappel sur le tableau de bord quand la photo de départ manque (ajout ou remplacement dans Édition)
+- Suppression d'une édition (essais) avec ses participants et ses photos, après saisie de son nom
+
 ## 1.4.1 – 17/11/2026
 - La redirection vers la connexion ne dépend plus de base_url
 - Alerte dans l'admin et à l'installation si base_url (config.php) ne correspond pas à l'adresse du site
