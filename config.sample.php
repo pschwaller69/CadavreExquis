@@ -27,6 +27,8 @@ return [
         'from_name' => 'Cadavre Exquis Photographique',
         'admin'     => 'patrick@schwaller.fr', // reçoit les alertes (retards, chaînes en attente)
     ],
+    'mail_pause_sec'     => 4,  // pause entre deux mails d'un envoi groupé (invitations, points, fin)
+    'invitation_lot'     => 20, // nombre d'invitations envoyées par clic
 
     // Règles du jeu
     'delai_jours'        => 14, // délai pour rendre sa photo

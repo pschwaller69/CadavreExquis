@@ -32,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $n = 0;
             foreach (q("SELECT DISTINCT p.* FROM participants p JOIN maillons m ON m.participant_id = p.id
                         WHERE p.edition_id = ? AND m.statut = 'rendu' AND p.mail_fin = 0", [$eid])->fetchAll() as $p) {
+                @set_time_limit(900);
+                if ($n > 0) pause_envoi();
                 if (envoyer_modele('fin', $p['mail'], vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
                     update('participants', (int) $p['id'], ['mail_fin' => 1]); $n++;
                 }

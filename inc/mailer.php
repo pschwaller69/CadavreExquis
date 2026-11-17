@@ -5,6 +5,16 @@ require_once __DIR__ . '/PHPMailer/Exception.php';
 require_once __DIR__ . '/PHPMailer/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/SMTP.php';
 
+/** PHPMailer sans encodage de l'en-tête List-Unsubscribe (il doit rester lisible tel quel). */
+class MailerCadavre extends PHPMailer
+{
+    public function encodeHeader($str, $position = 'text')
+    {
+        if (str_starts_with((string) $str, '<mailto:')) return $str;
+        return parent::encodeHeader($str, $position);
+    }
+}
+
 /** Remplace {variables} dans un texte. */
 function remplir(string $txt, array $vars): string
 {
@@ -23,12 +33,12 @@ function texte_vers_html(string $txt): string
 /**
  * Envoie un mail et le journalise. Retourne true si OK.
  */
-function envoyer_mail(string $to, string $sujet, string $corps, ?string $nom = null): bool
+function envoyer_mail(string $to, string $sujet, string $corps, ?string $nom = null, array $opts = []): bool
 {
     $statut = 'envoye';
     $erreur = null;
     if (cfg('mail.mode') === 'smtp') {
-        $m = new PHPMailer(true);
+        $m = new MailerCadavre(true);
         try {
             $m->isSMTP();
             $m->Host = cfg('mail.host');
@@ -40,6 +50,10 @@ function envoyer_mail(string $to, string $sujet, string $corps, ?string $nom = n
             $m->CharSet = 'UTF-8';
             $m->setFrom(cfg('mail.from'), cfg('mail.from_name'));
             $m->addReplyTo(cfg('mail.from'), cfg('mail.from_name'));
+            if (!empty($opts['desinscription'])) {
+                // Mails envoyés à plusieurs personnes : lien de désinscription standard (moins de risque de spam)
+                $m->addCustomHeader('List-Unsubscribe', '<mailto:' . cfg('mail.from') . '?subject=STOP>');
+            }
             $m->addAddress($to, $nom ?? '');
             $m->Subject = $sujet;
             $m->isHTML(true);
@@ -65,7 +79,15 @@ function envoyer_modele(string $code, string $to, array $vars, ?string $nom = nu
 {
     $mod = q1('SELECT * FROM modeles_mail WHERE code = ?', [$code]);
     if (!$mod) return false;
-    return envoyer_mail($to, remplir($mod['sujet'], $vars), remplir($mod['corps'], $vars), $nom);
+    $groupes = ['invitation', 'file_attente', 'fin']; // mails envoyés à beaucoup de monde d'un coup
+    return envoyer_mail($to, remplir($mod['sujet'], $vars), remplir($mod['corps'], $vars), $nom,
+        ['desinscription' => in_array($code, $groupes, true)]);
+}
+
+/** Pause entre deux mails d'un envoi groupé (évite le classement en spam). */
+function pause_envoi(): void
+{
+    if (cfg('mail.mode') === 'smtp') sleep(max(0, (int) cfg('mail_pause_sec', 4)));
 }
 
 function mail_admin(string $sujet, string $corps): void

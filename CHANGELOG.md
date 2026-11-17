@@ -3,6 +3,11 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.10.0 – 17/11/2026
+- Moins de spam : invitations envoyées par lots (20 par clic, `invitation_lot`) avec une pause de 4 s
+  entre chaque mail (`mail_pause_sec`), y compris pour le point de file d'attente et le mail de fin
+- En-tête standard de désinscription (List-Unsubscribe) sur les mails envoyés à beaucoup de monde
+
 ## 1.9.1 – 17/11/2026
 - Inscription : le champ « Nom du club » n'apparaît plus que si « Autre club… » est choisi
 

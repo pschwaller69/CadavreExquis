@@ -96,7 +96,7 @@ Elle vient d'être transmise au participant suivant.
 Le résultat complet sera dévoilé à la fin du {edition}.
 
 Patrick"],
-        'invitation' => ['Invitation des anciens participants', 'Le {edition} commence : inscris-toi !',
+        'invitation' => ['Invitation des anciens participants', '{prenom}, un nouveau cadavre exquis photo se prépare',
 "Bonjour {prenom},
 
 Tu as participé à un précédent cadavre exquis photographique : merci encore !

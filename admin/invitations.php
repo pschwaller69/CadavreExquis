@@ -22,9 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch (post('action')) {
             case 'envoyer':
                 @set_time_limit(900);
-                $mails = array_unique(array_map('mb_strtolower', (array) ($_POST['mails'] ?? [])));
+                $mails = array_values(array_unique(array_map('mb_strtolower', (array) ($_POST['mails'] ?? []))));
+                $lot = max(1, (int) cfg('invitation_lot', 20));
+                $reste = max(0, count($mails) - $lot);
+                $mails = array_slice($mails, 0, $lot); // un lot à la fois, espacé
                 $ok = $ko = 0;
-                foreach ($mails as $mail) {
+                foreach ($mails as $i => $mail) {
+                    if ($i > 0) pause_envoi();
                     $p = q1('SELECT * FROM participants WHERE mail = ? AND ne_plus_inviter = 0 ORDER BY id DESC LIMIT 1', [$mail]);
                     if (!$p) continue;
                     if (qv('SELECT COUNT(*) FROM participants WHERE edition_id = ? AND mail = ?', [$eid, $mail])) continue;
@@ -36,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $ko++;
                     }
                 }
-                flash("Invitation envoyée à $ok personne(s)." . ($ko ? " $ko échec(s) : voir le journal dans Mails." : ''), $ko ? 'info' : 'ok');
+                flash("Invitation envoyée à $ok personne(s)." . ($ko ? " $ko échec(s) : voir le journal dans Mails." : '')
+                    . ($reste ? " Il en reste $reste : envoyez le lot suivant dans 1 à 2 heures (moins de risque de spam)." : ''), $ko || $reste ? 'info' : 'ok');
                 break;
             case 'stop':
                 q('UPDATE participants SET ne_plus_inviter = 1 WHERE mail = ?', [mb_strtolower(post('mail'))]);
@@ -125,7 +130,8 @@ entete('Invitations', 'invitations');
 <form method="post" id="fenv" onsubmit="const n=this.querySelectorAll('input[name=&quot;mails[]&quot;]:checked').length; if(!n){alert('Aucun destinataire coché.');return false;} if(!confirm('Envoyer l\'invitation à '+n+' personne(s) ?'))return false; this.querySelector('button').disabled=true; this.querySelector('button').textContent='Envoi en cours… (ne pas fermer la page)';">
   <?= csrf_field() ?><input type="hidden" name="action" value="envoyer">
   <div class="actions">
-    <button class="btn">✉ Envoyer l'invitation aux personnes cochées</button>
+    <button class="btn">✉ Envoyer l'invitation (par lots de <?= (int) cfg('invitation_lot', 20) ?>)</button>
+    <span class="petit">Les <?= (int) cfg('invitation_lot', 20) ?> premières personnes cochées, une toutes les <?= (int) cfg('mail_pause_sec', 4) ?> s. Les personnes déjà invitées sont décochées automatiquement.</span>
     <label class="case"><input type="checkbox" checked onchange="document.querySelectorAll('.cb:not(:disabled)').forEach(c=>c.checked=this.checked)"> Tout cocher</label>
   </div>
   <table class="liste">
