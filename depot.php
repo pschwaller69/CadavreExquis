@@ -47,6 +47,7 @@ $prec = $m ? photo_precedente($m) : null;
     <figure><img src="img.php?t=<?= h($t) ?>&amp;q=prec" alt=""><figcaption>La photo reçue</figcaption></figure>
     <figure><img src="img.php?t=<?= h($t) ?>&amp;q=moi" alt=""><figcaption>Votre photo<?= $m['titre'] ? ' – « ' . h($m['titre']) . ' »' : '' ?></figcaption></figure>
   </div>
+  <?php if (!empty($m['demarche'])): ?><p class="regles"><em><?= nl2br(h($m['demarche'])) ?></em></p><?php endif ?>
   <p class="petit">Le résultat complet sera dévoilé à la fin du <?= h($ed['nom']) ?>.</p>
 
 <?php else: ?>
@@ -65,7 +66,10 @@ $prec = $m ? photo_precedente($m) : null;
     <label>Votre photo (JPEG, pleine résolution, <?= (int) cfg('upload_max_mo') ?> Mo max)
       <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required id="photo"></label>
     <img id="apercu" alt="" hidden>
-    <label>Titre (facultatif)<input name="titre" maxlength="200"></label>
+    <label>Titre (facultatif)<input name="titre" maxlength="200" value="<?= h(post('titre')) ?>"></label>
+    <label>Ta démarche en quelques mots (facultatif)
+      <textarea name="demarche" class="court" maxlength="600" placeholder="Ce que tu as retenu de la photo précédente, ton idée, ta technique…"><?= h(post('demarche')) ?></textarea>
+      <span class="petit">Affiché avec ta photo lors de la projection. 600 caractères maximum.</span></label>
     <label class="case"><input type="checkbox" name="accord" value="1" required>
       Je certifie être l'auteur de cette photo et j'accepte qu'elle soit transmise au participant suivant
       et projetée lors de la restitution.</label>

@@ -149,6 +149,7 @@ function assurer_schema(): void
     }
     try { db()->exec('ALTER TABLE participants ADD COLUMN ne_plus_inviter INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE participants ADD COLUMN dernier_point DATETIME NULL'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE maillons ADD COLUMN demarche TEXT NULL'); } catch (Throwable $e) {}
 
     // Liste des clubs : préremplie la première fois, puis complétée avec les clubs déjà saisis
     if (!(int) qv('SELECT COUNT(*) FROM clubs')) {

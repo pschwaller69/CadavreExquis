@@ -6,14 +6,14 @@ $ed = edition_admin();
 $eid = (int) $ed['id'];
 
 if (get('csv')) {
-    $rows = q("SELECT c.numero, m.position, p.nom, p.prenom, p.mail, p.club, p.statut, m.statut AS etat, m.date_envoi, m.date_limite, m.date_retour, m.titre, p.date_inscription
+    $rows = q("SELECT c.numero, m.position, p.nom, p.prenom, p.mail, p.club, p.statut, m.statut AS etat, m.date_envoi, m.date_limite, m.date_retour, m.titre, m.demarche, p.date_inscription
                FROM participants p LEFT JOIN maillons m ON m.participant_id = p.id LEFT JOIN chaines c ON c.id = m.chaine_id
                WHERE p.edition_id = ? ORDER BY c.numero, m.position, p.nom", [$eid])->fetchAll();
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="cadavre-exquis-' . $eid . '.csv"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, ['Chaine', 'Position', 'Nom', 'Prenom', 'Mail', 'Club', 'Statut participant', 'Etat maillon', 'Date envoi', 'Date limite', 'Date retour', 'Titre', 'Inscription'], ';');
+    fputcsv($out, ['Chaine', 'Position', 'Nom', 'Prenom', 'Mail', 'Club', 'Statut participant', 'Etat maillon', 'Date envoi', 'Date limite', 'Date retour', 'Titre', 'Démarche', 'Inscription'], ';');
     foreach ($rows as $r) {
         foreach (['date_envoi', 'date_limite', 'date_retour', 'date_inscription'] as $k) $r[$k] = fdate($r[$k]);
         fputcsv($out, array_values($r), ';');

@@ -1,6 +1,6 @@
 <?php
 // Numéro de version de l'application : à augmenter à chaque mise à jour (voir CHANGELOG.md).
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.9.0';
 const APP_DATE    = '2026-11-17';
 
 /**

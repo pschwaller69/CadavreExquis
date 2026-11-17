@@ -58,6 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 supprimer_chaine($ch, (bool) post('avec_participants'));
                 flash('Chaîne ' . $ch['numero'] . ' supprimée.');
                 redirect('index.php');
+            case 'textes':
+                update('maillons', (int) $m['id'], ['titre' => mb_substr(post('titre'), 0, 200) ?: null,
+                    'demarche' => mb_substr(str_replace("\r\n", "\n", post('demarche')), 0, 600) ?: null]);
+                flash('Titre et démarche enregistrés.');
+                break;
             case 'rouvrir':
                 update('chaines', (int) $ch['id'], ['statut' => 'active']);
                 avancer_chaine((int) $ch['id']);
@@ -107,7 +112,7 @@ entete('Chaîne ' . $ch['numero'], 'index');
 <tr>
   <td><?= $m['position'] ?></td>
   <td><?php if ($m['photo_reduite']): ?><a href="../img.php?m=<?= $m['id'] ?>&amp;v=o" target="_blank"><img class="mini" src="../img.php?m=<?= $m['id'] ?>" loading="lazy"></a><?php endif ?></td>
-  <td><strong><?= h($m['nom']) ?></strong> <?= h($m['prenom']) ?><br><span class="petit"><?= h($m['mail']) ?></span><?= $m['titre'] ? '<br><em>« ' . h($m['titre']) . ' »</em>' : '' ?></td>
+  <td><strong><?= h($m['nom']) ?></strong> <?= h($m['prenom']) ?><br><span class="petit"><?= h($m['mail']) ?></span><?= $m['titre'] ? '<br><em>« ' . h($m['titre']) . ' »</em>' : '' ?><?= !empty($m['demarche']) ? '<br><span class="petit" title="' . h($m['demarche']) . '">Démarche : ' . h(mb_strimwidth($m['demarche'], 0, 90, '…')) . '</span>' : '' ?></td>
   <td><?= h($m['club']) ?></td>
   <td><?= fdate($m['date_envoi']) ?></td>
   <td><?= fdate($m['date_limite']) ?><?= $m['relance_envoyee'] ? '<br><span class="petit">relancé</span>' : '' ?></td>
@@ -126,6 +131,11 @@ entete('Chaîne ' . $ch['numero'], 'index');
     <span class="petit">Lien : <a href="<?= h(url('depot.php?t=' . $m['token'])) ?>" target="_blank">page de dépôt</a></span>
   <?php elseif ($m['statut'] === 'rendu'): ?>
     <a class="btn petit sec" href="../img.php?m=<?= $m['id'] ?>&amp;v=o&amp;dl=1">Original</a>
+    <details style="margin-top:6px"><summary class="petit" style="cursor:pointer">Titre / démarche</summary>
+      <form method="post" class="form" style="margin-top:6px;min-width:260px"><?= csrf_field() ?><input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="textes">
+        <input name="titre" maxlength="200" placeholder="Titre" value="<?= h($m['titre']) ?>">
+        <textarea name="demarche" class="court" maxlength="600" placeholder="Démarche"><?= h($m['demarche'] ?? '') ?></textarea>
+        <button class="btn petit">Enregistrer</button></form></details>
     <form method="post" enctype="multipart/form-data" style="display:block;margin-top:6px"><?= csrf_field() ?>
       <input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="remplacer">
       <input type="file" name="photo" accept="image/*" required style="width:200px;padding:3px"> <button class="btn petit sec">Remplacer</button></form>

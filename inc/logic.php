@@ -262,6 +262,7 @@ function deposer_photo(array $m, array $file): void
     update('maillons', (int) $m['id'], [
         'photo' => $orig, 'photo_reduite' => $red, 'statut' => 'rendu', 'date_retour' => now(),
         'titre' => mb_substr((string) post('titre'), 0, 200) ?: null,
+        'demarche' => mb_substr(trim(str_replace("\r\n", "\n", (string) post('demarche'))), 0, 600) ?: null,
     ]);
     envoyer_modele('merci', $p['mail'], vars_mail($p, maillon((int) $m['id'])), $p['prenom'] . ' ' . $p['nom']);
     avancer_chaine((int) $m['chaine_id']);

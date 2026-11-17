@@ -3,6 +3,11 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.9.0 – 17/11/2026
+- Présentation et export PDF au format **16/9** (13,33 × 7,5 pouces, comme PowerPoint) ; diaporama inchangé
+- Dépôt : texte facultatif « Ta démarche » (600 caractères), affiché sous la photo précédente dans la présentation,
+  modifiable par l'admin sur la page de la chaîne, inclus dans l'export CSV
+
 ## 1.8.0 – 17/11/2026
 - Liste des clubs préenregistrée (clubs de 2026) proposée dans le formulaire d'inscription
 - « Autre club… » à l'inscription ajoute automatiquement le club à la liste
