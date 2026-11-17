@@ -26,6 +26,7 @@ $clubs = q("SELECT club, COUNT(*) n FROM participants WHERE club IS NOT NULL AND
 <title>Inscription – Cadavre Exquis Photographique</title><link rel="stylesheet" href="assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head() ?>
 <body class="public"><main class="carte">
 <h1>Cadavre Exquis <span>Photographique</span></h1>
+<p class="petit" style="margin-top:-10px"><a href="suivi.php">Où en sont les chaînes ? →</a></p>
 
 <?php if (!$ed): ?>
   <p>Les inscriptions ne sont pas ouvertes pour le moment. Revenez bientôt !</p>

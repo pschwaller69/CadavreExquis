@@ -3,6 +3,11 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.6.0 – 17/11/2026
+- Page publique **suivi.php** (sans mot de passe, sans nom ni photo) : chiffres clés, avancement de chaque
+  chaîne, photos par semaine, clubs participants ; installable sur téléphone comme application séparée
+- Liens vers le suivi depuis le formulaire d'inscription et le tableau de bord
+
 ## 1.5.0 – 17/11/2026
 - Rappel sur le tableau de bord quand la photo de départ manque (ajout ou remplacement dans Édition)
 - Suppression d'une édition (essais) avec ses participants et ses photos, après saisie de son nom

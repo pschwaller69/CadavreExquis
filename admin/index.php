@@ -73,6 +73,7 @@ entete('Tableau de bord', 'index');
   <a class="btn sec" href="presentation.php">▣ Présentation / diaporama</a>
   <a class="btn sec" href="export.php">⇩ Export</a>
   <a class="btn sec" href="<?= h(url()) ?>" target="_blank">Formulaire d'inscription ↗</a>
+  <a class="btn sec" href="<?= h(url('suivi.php')) ?>" target="_blank">Page de suivi publique ↗</a>
 </div>
 
 <div class="stats">

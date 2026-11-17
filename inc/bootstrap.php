@@ -116,11 +116,12 @@ function alerte_base_url(): string
 }
 
 /** Balises <head> pour l'application installable (PWA). */
-function pwa_head(): string
+function pwa_head(string $manifest = 'manifest.webmanifest'): string
 {
     $b = h(rtrim(cfg('base_url'), '/'));
+    $m = h($manifest);
     return <<<HTML
-<link rel="manifest" href="$b/manifest.webmanifest">
+<link rel="manifest" href="$b/$m">
 <meta name="theme-color" content="#17171f">
 <link rel="icon" type="image/png" href="$b/assets/icons/favicon.png">
 <link rel="apple-touch-icon" href="$b/assets/icons/apple-touch-icon.png">
