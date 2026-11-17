@@ -8,3 +8,4 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/rsync -a --exclude='.git' --exclude='.cpanel.yml' --exclude='.gitignore' --exclude='config.php' --exclude='data/photos/' ./ $DEPLOYPATH
     - /bin/mkdir -p ${DEPLOYPATH}data/photos
+    - /bin/echo "$(/usr/bin/git rev-parse --short HEAD) $(/bin/date '+%Y-%m-%d %H:%M')" > ${DEPLOYPATH}inc/deploy.txt

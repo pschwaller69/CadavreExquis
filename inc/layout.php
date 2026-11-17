@@ -7,7 +7,7 @@ function entete(string $titre, string $actif = ''): void
     $menu = ['index' => 'Tableau de bord', 'participants' => 'Participants', 'invitations' => 'Invitations', 'edition' => 'Édition',
              'mails' => 'Mails', 'admins' => 'Administrateurs'];
     ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= h($titre) ?> – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css"><?= pwa_head() ?>
+<title><?= h($titre) ?> – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head() ?>
 <body class="admin">
 <header class="barre">
   <a class="logo" href="index.php">Cadavre <span>Exquis</span></a>
@@ -18,6 +18,7 @@ function entete(string $titre, string $actif = ''): void
       <?php foreach ($eds as $e): ?><option value="<?= $e['id'] ?>" <?= $ed && $ed['id'] == $e['id'] ? 'selected' : '' ?>><?= h($e['nom']) ?></option><?php endforeach ?>
     </select></form>
     <?php endif ?>
+    <span class="version" title="<?= h(version_texte()) ?>">v<?= APP_VERSION ?></span>
     <span><?= h($a['nom'] ?: $a['login']) ?></span><a href="logout.php">Déconnexion</a>
   </div>
 </header>
@@ -25,7 +26,11 @@ function entete(string $titre, string $actif = ''): void
 <?php foreach (flash() as [$type, $msg]): ?><p class="alerte <?= $type ?>"><?= h($msg) ?></p><?php endforeach;
 }
 
-function pied(): void { echo '</main></body></html>'; }
+function pied(): void
+{
+    echo '<footer class="pied-app">Cadavre Exquis ' . h(version_texte())
+        . ' · <a href="https://github.com/pschwaller69/CadavreExquis/blob/main/CHANGELOG.md" target="_blank">nouveautés</a></footer></main></body></html>';
+}
 
 function badge(string $statut, ?string $lib = null): string
 {

@@ -112,3 +112,5 @@ table.liste form { display: inline; }
 @media (display-mode: standalone) {
   body.public { padding-top: 16px; }
 }
+.admin .version { background: var(--fond3); border: 1px solid var(--ligne); border-radius: 99px; padding: 1px 8px; font-size: 12px; cursor: help; }
+.pied-app { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--ligne); color: var(--doux); font-size: 12px; text-align: center; }

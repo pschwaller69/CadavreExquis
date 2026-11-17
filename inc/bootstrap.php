@@ -164,5 +164,6 @@ function require_admin(): array
     return $a;
 }
 
+require_once __DIR__ . '/version.php';
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/logic.php';
