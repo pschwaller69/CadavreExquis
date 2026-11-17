@@ -116,10 +116,11 @@ function alerte_base_url(): string
 }
 
 /** Balises <head> pour l'application installable (PWA). */
-function pwa_head(string $manifest = 'manifest.webmanifest'): string
+function pwa_head(string $manifest = 'manifest.webmanifest', string $titre = 'Cadavre Admin'): string
 {
     $b = h(rtrim(cfg('base_url'), '/'));
     $m = h($manifest);
+    $t = h($titre);
     return <<<HTML
 <link rel="manifest" href="$b/$m">
 <meta name="theme-color" content="#17171f">
@@ -128,7 +129,7 @@ function pwa_head(string $manifest = 'manifest.webmanifest'): string
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Cadavre Exquis">
+<meta name="apple-mobile-web-app-title" content="$t">
 <script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('$b/sw.js', {scope: '$b/'}));</script>
 HTML;
 }

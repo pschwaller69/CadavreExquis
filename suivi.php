@@ -66,7 +66,7 @@ $statuts = ['active' => 'en cours', 'attente' => 'attend un inscrit', 'close' =>
 $etat_ed = ['preparation' => 'en préparation', 'en_cours' => 'en cours', 'terminee' => 'terminé'];
 $max_sem = max(1, ...array_values($semaines ?: [0]));
 ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Suivi – Cadavre Exquis Photographique</title><link rel="stylesheet" href="assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head('manifest-suivi.webmanifest') ?>
+<title>Suivi – Cadavre Exquis Photographique</title><link rel="stylesheet" href="assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head('manifest-suivi.webmanifest', 'Suivi Cadavre') ?>
 <style>
   .suivi .chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 18px 0; }
   .suivi .chiffre { background: var(--fond); border: 1px solid var(--ligne); border-radius: 8px; padding: 12px; }
