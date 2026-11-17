@@ -4,6 +4,7 @@
   --vert: #3ecf8e; --orange: #ffb347; --rouge: #ff5d6c;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fond); color: var(--texte); }
 a { color: var(--violet2); }
 h1 { font-weight: 700; letter-spacing: .5px; }
