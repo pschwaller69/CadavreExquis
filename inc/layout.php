@@ -4,7 +4,7 @@ function entete(string $titre, string $actif = ''): void
     $a = admin();
     $ed = edition_admin();
     $eds = q("SELECT id, nom FROM editions WHERE nom <> 'Anciens participants' ORDER BY id DESC")->fetchAll();
-    $menu = ['index' => 'Tableau de bord', 'participants' => 'Participants', 'invitations' => 'Invitations', 'edition' => 'Édition',
+    $menu = ['index' => 'Tableau de bord', 'participants' => 'Participants', 'invitations' => 'Invitations', 'clubs' => 'Clubs', 'edition' => 'Édition',
              'mails' => 'Mails', 'admins' => 'Administrateurs'];
     ?><!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= h($titre) ?> – Cadavre Exquis</title><link rel="stylesheet" href="../assets/style.css?v=<?= APP_VERSION ?>"><?= pwa_head() ?>

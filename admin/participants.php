@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             case 'modifier':
                 update('participants', (int) $p['id'], ['nom' => nom_propre(post('nom')), 'prenom' => prenom_propre(post('prenom')),
-                    'mail' => mb_strtolower(post('mail')), 'club' => club_propre(post('club')), 'remarque' => post('remarque') ?: null]);
+                    'mail' => mb_strtolower(post('mail')), 'club' => club_inscription(post('club')), 'remarque' => post('remarque') ?: null]);
                 flash('Participant modifié.');
                 break;
             case 'supprimer':
@@ -79,7 +79,7 @@ $liste = q("SELECT p.*, m.position, m.statut AS m_statut, c.numero, c.id AS chai
             FROM participants p LEFT JOIN maillons m ON m.participant_id = p.id LEFT JOIN chaines c ON c.id = m.chaine_id
             WHERE p.edition_id = ? ORDER BY p.nom, p.prenom", [$eid])->fetchAll();
 $clubs = q('SELECT club, COUNT(*) n FROM participants WHERE edition_id = ? GROUP BY club ORDER BY club', [$eid])->fetchAll();
-$tous_clubs = q('SELECT DISTINCT club FROM participants ORDER BY club')->fetchAll(PDO::FETCH_COLUMN);
+$tous_clubs = clubs_actifs();
 
 entete('Participants', 'participants');
 ?>
@@ -114,14 +114,7 @@ entete('Participants', 'participants');
       <label class="case"><input type="checkbox" name="bienvenue" value="1"> Envoyer le mail de bienvenue</label>
       <button class="btn sec">Importer</button>
     </form>
-    <form method="post" class="form" style="margin-top:18px"><?= csrf_field() ?><input type="hidden" name="action" value="renommer_club">
-      <h2 style="margin:0">Harmoniser un nom de club</h2>
-      <div class="ligne">
-        <select name="ancien"><?php foreach ($clubs as $c): ?><option value="<?= h($c['club']) ?>"><?= h($c['club']) ?> (<?= $c['n'] ?>)</option><?php endforeach ?></select>
-        <input name="nouveau" list="clubs" placeholder="Nouveau nom" required>
-      </div>
-      <button class="btn sec">Renommer</button>
-    </form>
+    <p class="petit" style="margin-top:18px">Liste, ajout et harmonisation des clubs : page <a href="clubs.php">Clubs</a>.</p>
   </div>
 </div>
 

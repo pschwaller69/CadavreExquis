@@ -226,6 +226,12 @@ function placer_si_chaine_en_attente(array $p): ?array
 }
 
 /** Inscrit un participant (formulaire public, saisie admin ou import). */
+/** Club tel qu'enregistré pour un participant : nom de la liste si connu, sinon ajouté à la liste. */
+function club_inscription(string $club): string
+{
+    try { return ajouter_club($club); } catch (Throwable $e) { return club_propre($club) ?: 'Indépendant'; }
+}
+
 function inscrire(int $edition_id, string $nom, string $prenom, string $mail, string $club, bool $mail_bienvenue = true): array
 {
     $mail = mb_strtolower(trim($mail));
@@ -233,7 +239,7 @@ function inscrire(int $edition_id, string $nom, string $prenom, string $mail, st
     if ($exist) return ['deja' => true, 'participant' => $exist];
     $id = insert('participants', [
         'edition_id' => $edition_id, 'nom' => nom_propre($nom), 'prenom' => prenom_propre($prenom),
-        'mail' => $mail, 'club' => club_propre($club) ?: 'Indépendant', 'statut' => 'attente',
+        'mail' => $mail, 'club' => club_inscription($club), 'statut' => 'attente',
         'date_inscription' => now(), 'mail_bienvenue' => 0,
     ]);
     $p = participant($id);
@@ -367,4 +373,31 @@ function supprimer_chaine(array $ch, bool $avec_participants = true): void
         else update('participants', (int) $pid, ['statut' => 'abandon']);
     }
     supprimer_dossier(PHOTO_DIR . '/' . (int) $ch['edition_id'] . '/' . basename($ch['numero']));
+}
+
+// ---------------------------------------------------------------- clubs
+function est_independant(string $club): bool
+{
+    return in_array(mb_strtolower(trim($club)), ['', 'indépendant', 'independant', 'individuel', 'aucun'], true);
+}
+
+/** Ajoute un club s'il n'existe pas déjà (comparaison sans tenir compte des majuscules). Retourne le nom retenu. */
+function ajouter_club(string $nom): string
+{
+    $nom = club_propre($nom);
+    if (est_independant($nom)) return 'Indépendant';
+    foreach (q('SELECT nom FROM clubs')->fetchAll(PDO::FETCH_COLUMN) as $c) {
+        if (mb_strtolower($c) === mb_strtolower($nom)) return $c;
+    }
+    insert('clubs', ['nom' => $nom, 'actif' => 1, 'date_creation' => now()]);
+    return $nom;
+}
+
+function clubs_actifs(): array
+{
+    try {
+        return q('SELECT nom FROM clubs WHERE actif = 1 ORDER BY nom')->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $e) { // table pas encore créée
+        return q("SELECT DISTINCT club FROM participants WHERE club IS NOT NULL AND club <> '' ORDER BY club")->fetchAll(PDO::FETCH_COLUMN);
+    }
 }

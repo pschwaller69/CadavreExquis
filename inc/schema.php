@@ -38,6 +38,8 @@ function schema_sql(string $driver): array
         "CREATE TABLE IF NOT EXISTS invitations (
             id $pk, edition_id INT NOT NULL, mail VARCHAR(190) NOT NULL, date_envoi DATETIME,
             FOREIGN KEY (edition_id) REFERENCES editions(id) ON DELETE CASCADE)$eng",
+        "CREATE TABLE IF NOT EXISTS clubs (
+            id $pk, nom VARCHAR(190) NOT NULL UNIQUE, actif INT NOT NULL DEFAULT 1, date_creation DATETIME)$eng",
         "CREATE TABLE IF NOT EXISTS journal_mails (
             id $pk, date_envoi DATETIME, destinataire VARCHAR(190), sujet VARCHAR(255), corps $txt,
             statut VARCHAR(20), erreur VARCHAR(500))$eng",
@@ -147,4 +149,27 @@ function assurer_schema(): void
     }
     try { db()->exec('ALTER TABLE participants ADD COLUMN ne_plus_inviter INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE participants ADD COLUMN dernier_point DATETIME NULL'); } catch (Throwable $e) {}
+
+    // Liste des clubs : préremplie la première fois, puis complétée avec les clubs déjà saisis
+    if (!(int) qv('SELECT COUNT(*) FROM clubs')) {
+        foreach (clubs_defaut() as $c) ajouter_club($c);
+        foreach (q("SELECT DISTINCT club FROM participants WHERE club IS NOT NULL AND club <> ''")->fetchAll(PDO::FETCH_COLUMN) as $c) ajouter_club($c);
+    }
+}
+
+/** Clubs connus (cadavre exquis 2026). */
+function clubs_defaut(): array
+{
+    return [
+        'ASCMO (Lissieu)',
+        'ASCS (Rillieux la Pape)',
+        'CLAVI (Villeurbanne)',
+        'Club Photo de Dardilly (Dardilly)',
+        'Club Photo de Feurs (42)',
+        'Club Photo St André de Corcy (St André de Corcy)',
+        'Image Contact (Miribel)',
+        'Objectifs en Dombes (Ambérieux-en-Dombes)',
+        'Photo Passion (les Echets)',
+        'SCF',
+    ];
 }

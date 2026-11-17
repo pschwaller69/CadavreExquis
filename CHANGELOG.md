@@ -3,6 +3,11 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.8.0 – 17/11/2026
+- Liste des clubs préenregistrée (clubs de 2026) proposée dans le formulaire d'inscription
+- « Autre club… » à l'inscription ajoute automatiquement le club à la liste
+- Page **Clubs** : ajouter, renommer, fusionner deux écritures, masquer du formulaire, supprimer
+
 ## 1.7.1 – 17/11/2026
 - L'admin (« Cadavre Admin ») et le suivi (« Suivi Cadavre ») s'installent comme deux applications distinctes
   sur le même téléphone (portées séparées : /admin/ et /suivi.php)
