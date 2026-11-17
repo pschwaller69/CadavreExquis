@@ -70,7 +70,7 @@ function update(string $table, int $id, array $data): void
 }
 
 function now(): string { return date('Y-m-d H:i:s'); }
-function plus_jours(string $date, int $j): string { return date('Y-m-d H:i:s', strtotime($date . " +$j days")); }
+function plus_jours(string $date, int $j): string { return date('Y-m-d H:i:s', strtotime($date . ' ' . sprintf('%+d', $j) . ' days')); }
 function fdate(?string $d, bool $heure = false): string
 {
     if (!$d) return '';

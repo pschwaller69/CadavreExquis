@@ -3,6 +3,11 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.4.0 – 17/11/2026
+- Mail « point sur la file d'attente » : nombre de personnes avant soi + estimation indicative,
+  envoyé automatiquement tous les 14 jours (`point_attente_jours`) et via un bouton du tableau de bord
+- Tableau de bord : rang, tour estimé et date du dernier point pour chaque inscrit en attente
+
 ## 1.3.1 – 17/11/2026
 - Remplacement des dernières mentions de cadavre.ascs.fr par cadavreexquis.schwaller.art (README, cron)
 

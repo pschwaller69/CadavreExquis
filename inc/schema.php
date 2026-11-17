@@ -111,6 +111,19 @@ N'hésite pas à transmettre ce lien aux membres de ton club !
 Patrick
 
 (Tu reçois ce mail car tu as participé à une édition précédente. Si tu ne souhaites plus être invité, réponds simplement « stop ».)"],
+        'file_attente' => ['Point sur la file d\'attente', 'Cadavre exquis : où en es-tu dans la file d\'attente ?',
+"Bonjour {prenom},
+
+Petit point sur le {edition} : tu es toujours bien inscrit(e) !
+
+{phrase_rang}
+À titre indicatif, ton tour devrait arriver {estimation}.
+
+Pour l'instant, {nb_photos} photos ont déjà été réalisées dans les {nb_chaines} chaînes.
+Tu recevras un mail avec la photo et ton lien de dépôt dès que ce sera à toi.
+
+À bientôt,
+Patrick"],
         'fin' => ['Cadavre terminé', 'Le {edition} est terminé !',
 "Bonjour {prenom},
 
@@ -133,4 +146,5 @@ function assurer_schema(): void
         }
     }
     try { db()->exec('ALTER TABLE participants ADD COLUMN ne_plus_inviter INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE participants ADD COLUMN dernier_point DATETIME NULL'); } catch (Throwable $e) {}
 }

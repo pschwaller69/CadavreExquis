@@ -271,3 +271,73 @@ function demarrer_edition(array $ed): int
     }
     return $n;
 }
+
+// ---------------------------------------------------------------- point sur la file d'attente
+/** Durée moyenne (jours) entre l'envoi et le rendu d'une photo dans l'édition (10 j par défaut). */
+function duree_moyenne_maillon(int $edition_id): float
+{
+    $ms = q("SELECT m.date_envoi, m.date_retour FROM maillons m JOIN chaines c ON c.id = m.chaine_id
+             WHERE c.edition_id = ? AND m.statut IN ('rendu','passe') AND m.date_retour IS NOT NULL", [$edition_id])->fetchAll();
+    if (count($ms) < 3) return 10.0;
+    $t = 0;
+    foreach ($ms as $m) $t += max(0, strtotime($m['date_retour']) - strtotime($m['date_envoi']));
+    return max(1.0, $t / count($ms) / 86400);
+}
+
+/**
+ * File d'attente d'une édition avec rang et estimation pour chacun.
+ * Indicatif : la règle « pas le même club que les 2 derniers » peut décaler un peu l'ordre.
+ */
+function file_attente(int $edition_id): array
+{
+    $file = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY date_inscription, id", [$edition_id])->fetchAll();
+    $nb_ch = max(1, (int) qv("SELECT COUNT(*) FROM chaines WHERE edition_id = ? AND statut <> 'close'", [$edition_id]));
+    $duree = duree_moyenne_maillon($edition_id);
+    foreach ($file as $i => &$p) {
+        $p['rang'] = $i + 1;
+        $jours = (int) ceil(($i + 1) / $nb_ch) * $duree; // nombre de « tours » avant lui x durée moyenne d'un tour
+        $p['jours_estimes'] = $jours;
+    }
+    return $file;
+}
+
+function texte_estimation(float $jours): string
+{
+    if ($jours <= 7) return 'dans les prochains jours';
+    $sem = (int) round($jours / 7);
+    if ($sem <= 1) return 'dans une semaine environ';
+    if ($sem <= 8) return "dans $sem semaines environ";
+    return 'dans ' . (int) round($jours / 30) . ' mois environ';
+}
+
+/**
+ * Envoie le point « combien de personnes avant toi » aux inscrits en attente.
+ * $force = true : à tous (bouton) ; sinon seulement si le dernier point date de N jours (cron).
+ */
+function envoyer_points_attente(array $ed, bool $force = false): int
+{
+    if ($ed['statut'] !== 'en_cours') return 0;
+    $freq = (int) cfg('point_attente_jours', 14);
+    if (!$force && $freq <= 0) return 0;
+    $limite = plus_jours(now(), -$freq);
+    $nb_photos = (int) qv("SELECT COUNT(*) FROM maillons m JOIN chaines c ON c.id = m.chaine_id WHERE c.edition_id = ? AND m.statut = 'rendu'", [$ed['id']]);
+    $nb_chaines = (int) qv('SELECT COUNT(*) FROM chaines WHERE edition_id = ?', [$ed['id']]);
+    $n = 0;
+    foreach (file_attente((int) $ed['id']) as $p) {
+        $ref = $p['dernier_point'] ?: $p['date_inscription'];
+        if (!$force && $ref > $limite) continue;
+        $devant = $p['rang'] - 1;
+        $vars = vars_mail($p) + [
+            'rang' => $p['rang'], 'devant' => $devant,
+            'phrase_rang' => $devant === 0 ? 'Bonne nouvelle : tu es le prochain sur la liste !'
+                : ($devant === 1 ? 'Il n\'y a plus qu\'une personne avant toi.' : "Il y a encore $devant personnes avant toi."),
+            'estimation' => texte_estimation($p['jours_estimes']),
+            'nb_photos' => $nb_photos, 'nb_chaines' => $nb_chaines,
+        ];
+        if (envoyer_modele('file_attente', $p['mail'], $vars, $p['prenom'] . ' ' . $p['nom'])) {
+            update('participants', (int) $p['id'], ['dernier_point' => now()]);
+            $n++;
+        }
+    }
+    return $n;
+}

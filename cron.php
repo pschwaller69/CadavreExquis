@@ -53,7 +53,12 @@ if ($retards) {
     $log[] = count($retards) . ' alerte(s) de retard envoyée(s) à l\'admin';
 }
 
-// 4. Chaînes sans participant en cours (fin de délai d'envoi, réparation)
+// 4. Point régulier aux inscrits en liste d'attente (« il reste N personnes avant toi »)
+foreach (q("SELECT * FROM editions WHERE statut = 'en_cours'")->fetchAll() as $ed) {
+    if ($n = envoyer_points_attente($ed)) $log[] = "Point file d'attente envoyé à $n inscrit(s) ({$ed['nom']})";
+}
+
+// 5. Chaînes sans participant en cours (fin de délai d'envoi, réparation)
 foreach (q("SELECT c.* FROM chaines c JOIN editions e ON e.id = c.edition_id WHERE e.statut = 'en_cours' AND c.statut <> 'close'")->fetchAll() as $ch) {
     if (qv("SELECT COUNT(*) FROM maillons WHERE chaine_id = ? AND statut = 'en_cours'", [$ch['id']])) continue;
     if (chaine_doit_fermer($ch)) { update('chaines', (int) $ch['id'], ['statut' => 'close']); $log[] = "Chaîne {$ch['numero']} terminée"; continue; }

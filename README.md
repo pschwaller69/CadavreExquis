@@ -71,6 +71,7 @@ mettez ses paramètres SMTP (`mail.schwaller.art`, port 465, `ssl`) dans `config
 ## Réglages (config.php)
 - `delai_jours` (14) : délai pour rendre sa photo.
 - `relance_jours` (10) : relance automatique.
+- `point_attente_jours` (14) : mail « il reste N personnes avant toi » aux inscrits en attente (0 = jamais).
 - `auto_passer_jours` (0) : 0 = vous décidez ; N = passe automatiquement au suivant N jours après l'échéance.
 - `upload_max_mo` (30) : taille maximale d'une photo (voir aussi `.user.ini`).
 - `reduite_px` (2000) : taille de la version transmise au suivant et projetée.

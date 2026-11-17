@@ -31,6 +31,7 @@ return [
     // Règles du jeu
     'delai_jours'        => 14, // délai pour rendre sa photo
     'relance_jours'      => 10, // relance automatique à J+10
+    'point_attente_jours' => 14, // mail « il reste N personnes avant toi » tous les N jours (0 = jamais)
     'auto_passer_jours'  => 0,  // 0 = jamais ; sinon passe automatiquement au suivant N jours après la date limite
 
     // Photos
