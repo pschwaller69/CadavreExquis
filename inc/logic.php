@@ -148,15 +148,39 @@ function vars_mail(array $p, ?array $m = null): array
 
 // ---------------------------------------------------------------- moteur
 /** Choisit le prochain participant de la liste d'attente pour une chaîne (en évitant les clubs des derniers maillons). */
+/**
+ * Clubs des dernières photos réellement présentes dans la chaîne (les participants passés ne comptent pas,
+ * puisque leur photo n'est pas dans la chaîne), du plus récent au plus ancien. « Indépendant » est ignoré.
+ */
+function clubs_voisins(int $chaine_id, int $n = 2): array
+{
+    $clubs = q("SELECT p.club FROM maillons m JOIN participants p ON p.id = m.participant_id
+                WHERE m.chaine_id = ? AND m.statut = 'rendu' ORDER BY m.position DESC LIMIT " . (int) $n, [$chaine_id])->fetchAll(PDO::FETCH_COLUMN);
+    return array_map(fn($c) => est_independant((string) $c) ? '' : mb_strtolower((string) $c), $clubs);
+}
+
+/** Niveau de conflit d'un club avec la fin d'une chaîne : 0 = aucun, 1 = même club que l'avant-dernière, 2 = même club que la dernière photo. */
+function conflit_club(?string $club, array $voisins): int
+{
+    $c = est_independant((string) $club) ? '' : mb_strtolower((string) $club);
+    if ($c === '') return 0;
+    if (($voisins[0] ?? null) === $c) return 2;
+    if (($voisins[1] ?? null) === $c) return 1;
+    return 0;
+}
+
+/**
+ * Prochain participant pour une chaîne : le plus ancien inscrit en attente dont le club n'est pas celui
+ * des 2 dernières photos ; à défaut, pas celui de la dernière (jamais deux du même club à la suite) ;
+ * à défaut (tous du même club), le plus ancien.
+ */
 function choisir_suivant(array $chaine): ?array
 {
     $cands = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY date_inscription, id", [$chaine['edition_id']])->fetchAll();
     if (!$cands) return null;
-    $recents = q("SELECT p.club FROM maillons m JOIN participants p ON p.id = m.participant_id
-                  WHERE m.chaine_id = ? ORDER BY m.position DESC LIMIT 2", [$chaine['id']])->fetchAll(PDO::FETCH_COLUMN);
-    $recents = array_map('mb_strtolower', $recents);
-    foreach ($cands as $c) {
-        if (!in_array(mb_strtolower($c['club']), $recents, true)) return $c;
+    $voisins = clubs_voisins((int) $chaine['id']);
+    foreach ([0, 1] as $tolere) {
+        foreach ($cands as $c) if (conflit_club($c['club'], $voisins) <= $tolere) return $c;
     }
     return $cands[0];
 }
@@ -219,8 +243,14 @@ function placer_si_chaine_en_attente(array $p): ?array
 {
     $ed = edition((int) $p['edition_id']);
     if ($ed['statut'] !== 'en_cours') return null;
-    $ch = q1("SELECT * FROM chaines WHERE edition_id = ? AND statut = 'attente' ORDER BY attente_depuis, numero LIMIT 1", [$ed['id']]);
-    if (!$ch) return null;
+    // Parmi les chaînes qui attendent, la plus ancienne où ce club ne suit pas le même club
+    $attente = q("SELECT * FROM chaines WHERE edition_id = ? AND statut = 'attente' ORDER BY attente_depuis, numero", [$ed['id']])->fetchAll();
+    if (!$attente) return null;
+    $ch = null;
+    foreach ([0, 1, 2] as $tolere) {
+        foreach ($attente as $a) if (!$ch && conflit_club($p['club'], clubs_voisins((int) $a['id'])) <= $tolere) $ch = $a;
+        if ($ch) break;
+    }
     if (chaine_doit_fermer($ch)) { update('chaines', (int) $ch['id'], ['statut' => 'close']); return null; }
     return lancer_maillon($ch, $p);
 }

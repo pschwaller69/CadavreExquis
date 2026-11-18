@@ -3,6 +3,14 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.11.0 – 18/11/2026
+- Règle des clubs renforcée : jamais deux photos du même club à la suite, sauf si tous les inscrits en attente sont du même club
+  - on évite d'abord le club des 2 dernières photos, puis au minimum celui de la dernière
+  - seules les photos réellement déposées comptent (un participant passé ne bloque plus son club)
+  - « Indépendant » n'est pas considéré comme un club
+  - une nouvelle inscription va dans la chaîne en attente où son club ne suit pas le même club
+  - alerte si un placement manuel met deux personnes du même club à la suite
+
 ## 1.10.0 – 17/11/2026
 - Moins de spam : invitations envoyées par lots (20 par clic, `invitation_lot`) avec une pause de 4 s
   entre chaque mail (`mail_pause_sec`), y compris pour le point de file d'attente et le mail de fin

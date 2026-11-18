@@ -47,8 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $np = participant((int) post('participant'));
                 if (!$np || $np['statut'] !== 'attente' || $np['edition_id'] != $ch['edition_id']) throw new RuntimeException('Participant indisponible.');
                 if (qv("SELECT COUNT(*) FROM maillons WHERE chaine_id = ? AND statut = 'en_cours'", [$ch['id']])) throw new RuntimeException('Un participant est déjà en cours sur cette chaîne.');
+                $suite = conflit_club($np['club'], clubs_voisins((int) $ch['id'])) === 2;
                 lancer_maillon($ch, $np);
-                flash($np['prenom'] . ' ' . $np['nom'] . ' placé(e) dans la chaîne et prévenu(e).');
+                flash($np['prenom'] . ' ' . $np['nom'] . ' placé(e) dans la chaîne et prévenu(e).'
+                    . ($suite ? ' Attention : même club que la photo précédente.' : ''), $suite ? 'info' : 'ok');
                 break;
             case 'fermer':
                 update('chaines', (int) $ch['id'], ['statut' => 'close']);
