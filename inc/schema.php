@@ -130,6 +130,18 @@ Tu recevras un mail avec la photo et ton lien de dépôt dès que ce sera à toi
 
 À bientôt,
 Patrick"],
+        'resultats' => ['Résultats en ligne (après la projection)', 'Les cadavres exquis du {edition} sont en ligne',
+"Bonjour {prenom},
+
+Merci d'être venu(e) – ou d'avoir suivi de loin – la projection du {edition} !
+
+Toutes les chaînes sont maintenant visibles en ligne, photo par photo, avec les titres et les démarches de chacun :
+{lien_resultats}
+
+Tu peux les regarder en diaporama (bouton « Diaporama ») ou les enregistrer en PDF.
+Merci d'avoir joué le jeu, et à l'année prochaine !
+
+Patrick"],
         'fin' => ['Cadavre terminé', 'Le {edition} est terminé !',
 "Bonjour {prenom},
 
@@ -154,6 +166,10 @@ function assurer_schema(): void
     try { db()->exec('ALTER TABLE participants ADD COLUMN ne_plus_inviter INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE participants ADD COLUMN dernier_point DATETIME NULL'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE maillons ADD COLUMN demarche TEXT NULL'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE maillons ADD COLUMN type_photo VARCHAR(20) NULL'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE editions ADD COLUMN resultats_token VARCHAR(64) NULL'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE editions ADD COLUMN resultats_publies INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE participants ADD COLUMN mail_resultats INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
 
     // Liste des clubs : préremplie la première fois, puis complétée avec les clubs déjà saisis
     if (!(int) qv('SELECT COUNT(*) FROM clubs')) {

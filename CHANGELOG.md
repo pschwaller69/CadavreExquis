@@ -3,6 +3,13 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.13.0 – 18/11/2026
+- Dépôt : question obligatoire « photo réalisée pour l'occasion / photo d'archive », affichée dans la présentation
+  (au-dessus de la démarche), sur la page de la chaîne (modifiable) et dans l'export CSV
+- **Résultats en ligne** : page publique de la présentation par lien secret (`resultats.php?k=…`),
+  à publier / dépublier depuis le tableau de bord une fois l'édition clôturée (aperçu possible avant)
+- Mail « Résultats en ligne » avec `{lien_resultats}`, envoyé via la file d'envoi aux participants
+
 ## 1.12.0 – 18/11/2026
 - **File d'envoi** : invitations, points de file d'attente et mail de fin sont mis en file et envoyés
   par la tâche cron, 1 mail par passage (`cron_mails_par_passage`) ; la tâche cron passe toutes les 5 minutes

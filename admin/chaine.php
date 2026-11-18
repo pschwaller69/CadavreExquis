@@ -61,7 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('Chaîne ' . $ch['numero'] . ' supprimée.');
                 redirect('index.php');
             case 'textes':
-                update('maillons', (int) $m['id'], ['titre' => mb_substr(post('titre'), 0, 200) ?: null,
+                update('maillons', (int) $m['id'], ['type_photo' => array_key_exists(post('type_photo'), types_photo()) ? post('type_photo') : null,
+                    'titre' => mb_substr(post('titre'), 0, 200) ?: null,
                     'demarche' => mb_substr(str_replace("\r\n", "\n", post('demarche')), 0, 600) ?: null]);
                 flash('Titre et démarche enregistrés.');
                 break;
@@ -114,7 +115,7 @@ entete('Chaîne ' . $ch['numero'], 'index');
 <tr>
   <td><?= $m['position'] ?></td>
   <td><?php if ($m['photo_reduite']): ?><a href="../img.php?m=<?= $m['id'] ?>&amp;v=o" target="_blank"><img class="mini" src="../img.php?m=<?= $m['id'] ?>" loading="lazy"></a><?php endif ?></td>
-  <td><strong><?= h($m['nom']) ?></strong> <?= h($m['prenom']) ?><br><span class="petit"><?= h($m['mail']) ?></span><?= $m['titre'] ? '<br><em>« ' . h($m['titre']) . ' »</em>' : '' ?><?= !empty($m['demarche']) ? '<br><span class="petit" title="' . h($m['demarche']) . '">Démarche : ' . h(mb_strimwidth($m['demarche'], 0, 90, '…')) . '</span>' : '' ?></td>
+  <td><strong><?= h($m['nom']) ?></strong> <?= h($m['prenom']) ?><br><span class="petit"><?= h($m['mail']) ?></span><?= $m['titre'] ? '<br><em>« ' . h($m['titre']) . ' »</em>' : '' ?><?= !empty($m['type_photo']) ? '<br><span class="badge">' . h(libelle_type_photo($m['type_photo'])) . '</span>' : '' ?><?= !empty($m['demarche']) ? '<br><span class="petit" title="' . h($m['demarche']) . '">Démarche : ' . h(mb_strimwidth($m['demarche'], 0, 90, '…')) . '</span>' : '' ?></td>
   <td><?= h($m['club']) ?></td>
   <td><?= fdate($m['date_envoi']) ?></td>
   <td><?= fdate($m['date_limite']) ?><?= $m['relance_envoyee'] ? '<br><span class="petit">relancé</span>' : '' ?></td>
@@ -135,6 +136,8 @@ entete('Chaîne ' . $ch['numero'], 'index');
     <a class="btn petit sec" href="../img.php?m=<?= $m['id'] ?>&amp;v=o&amp;dl=1">Original</a>
     <details style="margin-top:6px"><summary class="petit" style="cursor:pointer">Titre / démarche</summary>
       <form method="post" class="form" style="margin-top:6px;min-width:260px"><?= csrf_field() ?><input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="textes">
+        <select name="type_photo"><option value="">Type de photo : non précisé</option>
+          <?php foreach (types_photo() as $k => $lib): ?><option value="<?= $k ?>" <?= ($m['type_photo'] ?? '') === $k ? 'selected' : '' ?>><?= h($lib) ?></option><?php endforeach ?></select>
         <input name="titre" maxlength="200" placeholder="Titre" value="<?= h($m['titre']) ?>">
         <textarea name="demarche" class="court" maxlength="600" placeholder="Démarche"><?= h($m['demarche'] ?? '') ?></textarea>
         <button class="btn petit">Enregistrer</button></form></details>

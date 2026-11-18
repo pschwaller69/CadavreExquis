@@ -15,6 +15,17 @@ if (($t = get('t')) !== '') {
             $nom = 'cadavre-exquis-photo-precedente.jpg';
         }
     }
+} elseif (($r = get('r')) !== '') {
+    // Page publique des résultats : seulement si l'édition est publiée
+    $ed = q1('SELECT * FROM editions WHERE resultats_token = ? AND resultats_publies = 1', [$r]);
+    if ($ed) {
+        if (get('base') !== '') {
+            $rel = $ed['photo_base'];
+        } elseif (get('m') !== '') {
+            $m = q1("SELECT m.* FROM maillons m JOIN chaines c ON c.id = m.chaine_id WHERE m.id = ? AND c.edition_id = ? AND m.statut = 'rendu'", [(int) get('m'), $ed['id']]);
+            $rel = $m['photo_reduite'] ?? null;
+        }
+    }
 } elseif (admin()) {
     if (get('base') !== '') {
         $ed = edition((int) get('base'));

@@ -135,6 +135,7 @@ function vars_mail(array $p, ?array $m = null): array
         'edition' => $ed['nom'] ?? '', 'delai' => cfg('delai_jours', 14),
         'date_fin' => fdate($ed['date_fin_envois'] ?? null),
         'site' => url(),
+        'lien_resultats' => !empty($ed['resultats_token']) ? url('resultats.php?k=' . $ed['resultats_token']) : '',
     ];
     if ($m) {
         $ch = chaine((int) $m['chaine_id']);
@@ -293,6 +294,7 @@ function deposer_photo(array $m, array $file): void
         'photo' => $orig, 'photo_reduite' => $red, 'statut' => 'rendu', 'date_retour' => now(),
         'titre' => mb_substr((string) post('titre'), 0, 200) ?: null,
         'demarche' => mb_substr(trim(str_replace("\r\n", "\n", (string) post('demarche'))), 0, 600) ?: null,
+        'type_photo' => array_key_exists((string) post('type_photo'), types_photo()) ? post('type_photo') : null,
     ]);
     envoyer_modele('merci', $p['mail'], vars_mail($p, maillon((int) $m['id'])), $p['prenom'] . ' ' . $p['nom']);
     avancer_chaine((int) $m['chaine_id']);
@@ -431,4 +433,23 @@ function clubs_actifs(): array
     } catch (Throwable $e) { // table pas encore créée
         return q("SELECT DISTINCT club FROM participants WHERE club IS NOT NULL AND club <> '' ORDER BY club")->fetchAll(PDO::FETCH_COLUMN);
     }
+}
+
+// ---------------------------------------------------------------- type de photo
+function types_photo(): array
+{
+    return ['occasion' => 'Photo réalisée pour l\'occasion', 'archive' => 'Photo d\'archive'];
+}
+function libelle_type_photo(?string $t): string { return types_photo()[$t] ?? ''; }
+
+// ---------------------------------------------------------------- résultats publics
+/** Lien public vers la présentation d'une édition (créé à la première demande). */
+function lien_resultats(array $ed): string
+{
+    $tok = $ed['resultats_token'] ?? null;
+    if (!$tok) {
+        $tok = token(12);
+        update('editions', (int) $ed['id'], ['resultats_token' => $tok]);
+    }
+    return url('resultats.php?k=' . $tok);
 }

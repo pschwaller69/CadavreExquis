@@ -116,3 +116,5 @@ table.liste form { display: inline; }
 .admin .version { background: var(--fond3); border: 1px solid var(--ligne); border-radius: 99px; padding: 1px 8px; font-size: 12px; cursor: help; }
 .pied-app { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--ligne); color: var(--doux); font-size: 12px; text-align: center; }
 textarea.court { min-height: 90px; font-family: inherit; font-size: 15px; }
+fieldset.choix-type { border: 1px solid var(--ligne); border-radius: 6px; padding: 8px 12px 10px; margin: 0; display: grid; gap: 6px; }
+fieldset.choix-type legend { color: var(--doux); font-size: 14px; padding: 0 4px; }

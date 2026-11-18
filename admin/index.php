@@ -28,6 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $n = envoyer_points_attente($ed, true);
             flash("Point sur la file d'attente mis en file d'envoi pour $n inscrit(s), fin estimée " . fin_estimee_file() . '.');
             break;
+        case 'publier':
+            lien_resultats($ed);
+            update('editions', $eid, ['resultats_publies' => post('publier') ? 1 : 0]);
+            flash(post('publier') ? 'Résultats publiés : le lien est actif.' : 'Résultats dépubliés : le lien ne montre plus rien.');
+            break;
+        case 'mail_resultats':
+            if (!$ed['resultats_publies']) { flash('Publiez d\'abord les résultats.', 'ko'); break; }
+            lien_resultats($ed);
+            $n = 0;
+            foreach (q("SELECT DISTINCT p.* FROM participants p JOIN maillons m ON m.participant_id = p.id
+                        WHERE p.edition_id = ? AND m.statut = 'rendu' AND p.mail_resultats = 0", [$eid])->fetchAll() as $p) {
+                if (mettre_en_file('resultats', $p['mail'], vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
+                    update('participants', (int) $p['id'], ['mail_resultats' => 1]); $n++;
+                }
+            }
+            flash("Lien des résultats mis en file d'envoi pour $n participant(s), fin estimée " . fin_estimee_file() . '.');
+            break;
         case 'mail_fin':
             $n = 0;
             foreach (q("SELECT DISTINCT p.* FROM participants p JOIN maillons m ON m.participant_id = p.id
@@ -51,6 +68,7 @@ $st = [
 ];
 $chaines = q('SELECT * FROM chaines WHERE edition_id = ? ORDER BY numero', [$eid])->fetchAll();
 $attente = file_attente($eid);
+$res_restants = (int) qv("SELECT COUNT(DISTINCT p.id) FROM participants p JOIN maillons m ON m.participant_id = p.id WHERE p.edition_id = ? AND m.statut = 'rendu' AND p.mail_resultats = 0", [$eid]);
 $fin_restants = qv("SELECT COUNT(DISTINCT p.id) FROM participants p JOIN maillons m ON m.participant_id = p.id WHERE p.edition_id = ? AND m.statut = 'rendu' AND p.mail_fin = 0", [$eid]);
 
 entete('Tableau de bord', 'index');
@@ -76,6 +94,20 @@ entete('Tableau de bord', 'index');
   <a class="btn sec" href="<?= h(url('suivi.php')) ?>" target="_blank">Page de suivi publique ↗</a>
 </div>
 
+<?php if ($ed['statut'] === 'terminee' || $ed['resultats_publies']): ?>
+<div class="panneau actions" style="margin-bottom:14px">
+  <strong>Résultats en ligne</strong>
+  <?= $ed['resultats_publies'] ? badge('rendu', 'publiés') : badge('close', 'non publiés') ?>
+  <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="publier"><input type="hidden" name="publier" value="<?= $ed['resultats_publies'] ? 0 : 1 ?>">
+    <button class="btn <?= $ed['resultats_publies'] ? 'sec' : '' ?>"><?= $ed['resultats_publies'] ? 'Dépublier' : '🌐 Publier la présentation' ?></button></form>
+  <?php if ($ed['resultats_publies']): ?>
+    <a class="btn sec" href="<?= h(lien_resultats($ed)) ?>" target="_blank">Voir la page publique ↗</a>
+    <form method="post" onsubmit="return confirm('Envoyer le lien des résultats à <?= $res_restants ?> participant(s) ?')"><?= csrf_field() ?>
+      <input type="hidden" name="action" value="mail_resultats"><button class="btn" <?= $res_restants ? '' : 'disabled' ?>>✉ Envoyer le lien aux participants (<?= $res_restants ?>)</button></form>
+    <input readonly value="<?= h(lien_resultats($ed)) ?>" onclick="this.select()" style="max-width:420px">
+  <?php endif ?>
+</div>
+<?php endif ?>
 <?php if ($nf = file_en_attente()): ?><p class="alerte info"><?= $nf ?> mail(s) groupé(s) en file d'envoi, fin estimée <?= h(fin_estimee_file()) ?> – <a href="mails.php">suivi</a>.</p><?php endif ?>
 <div class="stats">
   <div class="stat"><b><?= $st['inscrits'] ?></b><span>inscrits</span></div>
