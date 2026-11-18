@@ -380,8 +380,7 @@ function envoyer_points_attente(array $ed, bool $force = false): int
             'estimation' => texte_estimation($p['jours_estimes']),
             'nb_photos' => $nb_photos, 'nb_chaines' => $nb_chaines,
         ];
-        if ($n > 0) pause_envoi();
-        if (envoyer_modele('file_attente', $p['mail'], $vars, $p['prenom'] . ' ' . $p['nom'])) {
+        if (mettre_en_file('file_attente', $p['mail'], $vars, $p['prenom'] . ' ' . $p['nom'])) {
             update('participants', (int) $p['id'], ['dernier_point' => now()]);
             $n++;
         }

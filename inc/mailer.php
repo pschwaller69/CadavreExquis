@@ -94,3 +94,60 @@ function mail_admin(string $sujet, string $corps): void
 {
     if (cfg('mail.admin')) envoyer_mail(cfg('mail.admin'), '[Cadavre Exquis] ' . $sujet, $corps);
 }
+
+// ---------------------------------------------------------------- file d'envoi
+/*
+ * Les mails groupés (invitations, points de file d'attente, mail de fin) ne partent pas tous d'un coup :
+ * ils sont mis en file et la tâche cron en envoie quelques-uns à chaque passage (moins de risque de spam).
+ */
+function mettre_en_file(string $code, string $to, array $vars, ?string $nom = null): bool
+{
+    $mod = q1('SELECT * FROM modeles_mail WHERE code = ?', [$code]);
+    if (!$mod) return false;
+    if (qv("SELECT COUNT(*) FROM file_envoi WHERE statut = 'attente' AND code = ? AND destinataire = ?", [$code, $to])) return true; // déjà en file
+    insert('file_envoi', [
+        'code' => $code, 'destinataire' => $to, 'nom' => $nom, 'sujet' => remplir($mod['sujet'], $vars),
+        'corps' => remplir($mod['corps'], $vars), 'desinscription' => 1, 'statut' => 'attente', 'tentatives' => 0,
+        'date_creation' => now(),
+    ]);
+    return true;
+}
+
+/** Envoie les $max plus anciens mails de la file. Retourne le nombre envoyés. */
+function traiter_file(int $max = 1): int
+{
+    $n = 0;
+    foreach (q("SELECT * FROM file_envoi WHERE statut = 'attente' ORDER BY id LIMIT " . max(1, $max))->fetchAll() as $i => $f) {
+        if ($i > 0) pause_envoi();
+        $ok = envoyer_mail($f['destinataire'], $f['sujet'], $f['corps'], $f['nom'], ['desinscription' => (bool) $f['desinscription']]);
+        if ($ok) {
+            update('file_envoi', (int) $f['id'], ['statut' => 'envoye', 'date_envoi' => now(), 'tentatives' => $f['tentatives'] + 1]);
+            $n++;
+        } else {
+            $err = qv('SELECT erreur FROM journal_mails ORDER BY id DESC LIMIT 1');
+            $t = $f['tentatives'] + 1;
+            update('file_envoi', (int) $f['id'], ['tentatives' => $t, 'erreur' => mb_substr((string) $err, 0, 500), 'statut' => $t >= 3 ? 'erreur' : 'attente']);
+            break; // problème d'envoi : on réessaiera au prochain passage
+        }
+    }
+    return $n;
+}
+
+function file_en_attente(): int { return (int) qv("SELECT COUNT(*) FROM file_envoi WHERE statut = 'attente'"); }
+
+/** Heure estimée de fin de la file, d'après la fréquence du cron. */
+function fin_estimee_file(): string
+{
+    $n = file_en_attente();
+    if (!$n) return '';
+    $par = max(1, (int) cfg('cron_mails_par_passage', 1));
+    $min = (int) ceil($n / $par) * max(1, (int) cfg('cron_minutes', 5));
+    return $min < 60 ? "dans $min min environ" : 'vers ' . date('H:i', time() + $min * 60) . ($min >= 1440 - (int) date('G') * 60 ? ' (' . date('d/m', time() + $min * 60) . ')' : '');
+}
+
+/** Dernier passage de la tâche cron (enregistré par cron.php). */
+function dernier_cron(): ?string
+{
+    $f = DATA_DIR . '/cron_dernier.txt';
+    return is_file($f) ? trim((string) file_get_contents($f)) : null;
+}

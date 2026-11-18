@@ -21,27 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         switch (post('action')) {
             case 'envoyer':
-                @set_time_limit(900);
                 $mails = array_values(array_unique(array_map('mb_strtolower', (array) ($_POST['mails'] ?? []))));
-                $lot = max(1, (int) cfg('invitation_lot', 20));
-                $reste = max(0, count($mails) - $lot);
-                $mails = array_slice($mails, 0, $lot); // un lot à la fois, espacé
                 $ok = $ko = 0;
-                foreach ($mails as $i => $mail) {
-                    if ($i > 0) pause_envoi();
+                foreach ($mails as $mail) {
                     $p = q1('SELECT * FROM participants WHERE mail = ? AND ne_plus_inviter = 0 ORDER BY id DESC LIMIT 1', [$mail]);
                     if (!$p) continue;
                     if (qv('SELECT COUNT(*) FROM participants WHERE edition_id = ? AND mail = ?', [$eid, $mail])) continue;
                     $p['edition_id'] = $eid; // variables du mail = nouvelle édition
-                    if (envoyer_modele('invitation', $mail, vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
+                    if (mettre_en_file('invitation', $mail, vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
                         insert('invitations', ['edition_id' => $eid, 'mail' => $mail, 'date_envoi' => now()]);
                         $ok++;
                     } else {
                         $ko++;
                     }
                 }
-                flash("Invitation envoyée à $ok personne(s)." . ($ko ? " $ko échec(s) : voir le journal dans Mails." : '')
-                    . ($reste ? " Il en reste $reste : envoyez le lot suivant dans 1 à 2 heures (moins de risque de spam)." : ''), $ko || $reste ? 'info' : 'ok');
+                flash("$ok invitation(s) mise(s) en file d'envoi : la tâche cron les envoie une par une, fin estimée " . fin_estimee_file() . '. Suivi dans Mails.');
                 break;
             case 'stop':
                 q('UPDATE participants SET ne_plus_inviter = 1 WHERE mail = ?', [mb_strtolower(post('mail'))]);
@@ -130,8 +124,8 @@ entete('Invitations', 'invitations');
 <form method="post" id="fenv" onsubmit="const n=this.querySelectorAll('input[name=&quot;mails[]&quot;]:checked').length; if(!n){alert('Aucun destinataire coché.');return false;} if(!confirm('Envoyer l\'invitation à '+n+' personne(s) ?'))return false; this.querySelector('button').disabled=true; this.querySelector('button').textContent='Envoi en cours… (ne pas fermer la page)';">
   <?= csrf_field() ?><input type="hidden" name="action" value="envoyer">
   <div class="actions">
-    <button class="btn">✉ Envoyer l'invitation (par lots de <?= (int) cfg('invitation_lot', 20) ?>)</button>
-    <span class="petit">Les <?= (int) cfg('invitation_lot', 20) ?> premières personnes cochées, une toutes les <?= (int) cfg('mail_pause_sec', 4) ?> s. Les personnes déjà invitées sont décochées automatiquement.</span>
+    <button class="btn">✉ Envoyer l'invitation aux personnes cochées</button>
+    <span class="petit">Mises en file d'envoi : la tâche cron envoie <?= (int) cfg('cron_mails_par_passage', 1) ?> mail toutes les <?= (int) cfg('cron_minutes', 5) ?> min. Les personnes déjà invitées sont décochées.</span>
     <label class="case"><input type="checkbox" checked onchange="document.querySelectorAll('.cb:not(:disabled)').forEach(c=>c.checked=this.checked)"> Tout cocher</label>
   </div>
   <table class="liste">
@@ -141,7 +135,7 @@ entete('Invitations', 'invitations');
       <td><input type="checkbox" class="cb" name="mails[]" value="<?= h($p['mail']) ?>" <?= $dispo ? '' : 'disabled' ?> <?= $dispo && !$p['invite_le'] ? 'checked' : '' ?>></td>
       <td><strong><?= h($p['nom']) ?></strong></td><td><?= h($p['prenom']) ?></td><td><?= h($p['club']) ?></td><td><?= h($p['mail']) ?></td>
       <td><?= h($p['edition_nom']) ?></td>
-      <td><?= $p['stop'] ? badge('passe', 'ne plus inviter') : ($p['inscrit'] ? badge('rendu', 'déjà inscrit') : ($p['invite_le'] ? badge('attente', 'invité le ' . fdate($p['invite_le'])) : badge('close', 'pas encore invité'))) ?></td>
+      <td><?= $p['stop'] ? badge('passe', 'ne plus inviter') : ($p['inscrit'] ? badge('rendu', 'déjà inscrit') : ($p['invite_le'] ? badge('attente', 'invité le ' . fdate($p['invite_le']) . (qv("SELECT COUNT(*) FROM file_envoi WHERE statut = 'attente' AND code = 'invitation' AND destinataire = ?", [$p['mail']]) ? ' (en file)' : '')) : badge('close', 'pas encore invité'))) ?></td>
       <td><button class="btn petit sec" form="f-<?= md5($p['mail']) ?>"><?= $p['stop'] ? 'Réinviter' : 'Ne plus inviter' ?></button></td>
     </tr>
     <?php endforeach ?>

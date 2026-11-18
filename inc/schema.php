@@ -40,6 +40,10 @@ function schema_sql(string $driver): array
             FOREIGN KEY (edition_id) REFERENCES editions(id) ON DELETE CASCADE)$eng",
         "CREATE TABLE IF NOT EXISTS clubs (
             id $pk, nom VARCHAR(190) NOT NULL UNIQUE, actif INT NOT NULL DEFAULT 1, date_creation DATETIME)$eng",
+        "CREATE TABLE IF NOT EXISTS file_envoi (
+            id $pk, code VARCHAR(30), destinataire VARCHAR(190) NOT NULL, nom VARCHAR(190), sujet VARCHAR(255) NOT NULL,
+            corps $txt NOT NULL, desinscription INT NOT NULL DEFAULT 0, statut VARCHAR(20) NOT NULL DEFAULT 'attente',
+            tentatives INT NOT NULL DEFAULT 0, erreur VARCHAR(500), date_creation DATETIME, date_envoi DATETIME NULL)$eng",
         "CREATE TABLE IF NOT EXISTS journal_mails (
             id $pk, date_envoi DATETIME, destinataire VARCHAR(190), sujet VARCHAR(255), corps $txt,
             statut VARCHAR(20), erreur VARCHAR(500))$eng",

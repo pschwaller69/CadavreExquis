@@ -44,10 +44,12 @@ import CSV, harmonisation des noms de clubs, export CSV et zip des originaux, pl
 7. Vérifiez que `https://cadavreexquis.schwaller.art/data/photos/` et `https://cadavreexquis.schwaller.art/config.php` répondent « 403 Forbidden ».
 
 ### 3. Tâche cron (relances et alertes)
-cPanel > **Tâches Cron**, une fois par jour, par exemple à 9h :
+cPanel > **Tâches Cron**, **toutes les 5 minutes** (réglage courant « Une fois toutes les cinq minutes ») :
 ```
-0 9 * * * /usr/local/bin/php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php
+*/5 * * * * /usr/local/bin/php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php >/dev/null 2>&1
 ```
+La fin `>/dev/null 2>&1` évite de recevoir un mail de cPanel à chaque passage. Les mails groupés
+(invitations, points, fin) partent un par un à chaque passage ; relances et alertes ne partent qu'une fois.
 (Si la ligne de commande n'est pas possible : `https://cadavreexquis.schwaller.art/cron.php?key=VOTRE_CLE`.)
 
 ### 4. Tester les mails

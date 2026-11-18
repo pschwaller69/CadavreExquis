@@ -26,19 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
         case 'points':
             $n = envoyer_points_attente($ed, true);
-            flash("Point sur la file d'attente envoyé à $n inscrit(s).");
+            flash("Point sur la file d'attente mis en file d'envoi pour $n inscrit(s), fin estimée " . fin_estimee_file() . '.');
             break;
         case 'mail_fin':
             $n = 0;
             foreach (q("SELECT DISTINCT p.* FROM participants p JOIN maillons m ON m.participant_id = p.id
                         WHERE p.edition_id = ? AND m.statut = 'rendu' AND p.mail_fin = 0", [$eid])->fetchAll() as $p) {
-                @set_time_limit(900);
-                if ($n > 0) pause_envoi();
-                if (envoyer_modele('fin', $p['mail'], vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
+                if (mettre_en_file('fin', $p['mail'], vars_mail($p), $p['prenom'] . ' ' . $p['nom'])) {
                     update('participants', (int) $p['id'], ['mail_fin' => 1]); $n++;
                 }
             }
-            flash("Mail « cadavre terminé » envoyé à $n participant(s).");
+            flash("Mail « cadavre terminé » mis en file pour $n participant(s), fin estimée " . fin_estimee_file() . '.');
             break;
     }
     redirect('index.php');
@@ -78,6 +76,7 @@ entete('Tableau de bord', 'index');
   <a class="btn sec" href="<?= h(url('suivi.php')) ?>" target="_blank">Page de suivi publique ↗</a>
 </div>
 
+<?php if ($nf = file_en_attente()): ?><p class="alerte info"><?= $nf ?> mail(s) groupé(s) en file d'envoi, fin estimée <?= h(fin_estimee_file()) ?> – <a href="mails.php">suivi</a>.</p><?php endif ?>
 <div class="stats">
   <div class="stat"><b><?= $st['inscrits'] ?></b><span>inscrits</span></div>
   <div class="stat"><b><?= $st['attente'] ?></b><span>en liste d'attente</span></div>

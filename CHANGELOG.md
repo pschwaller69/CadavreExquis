@@ -3,6 +3,12 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.12.0 – 18/11/2026
+- **File d'envoi** : invitations, points de file d'attente et mail de fin sont mis en file et envoyés
+  par la tâche cron, 1 mail par passage (`cron_mails_par_passage`) ; la tâche cron passe toutes les 5 minutes
+- Page Mails : état de la tâche cron, mails en attente, fin estimée, envoyer le suivant / annuler / réessayer les erreurs
+- Les mails individuels (c'est ton tour, merci, bienvenue, relance) restent immédiats
+
 ## 1.11.0 – 18/11/2026
 - Règle des clubs renforcée : jamais deux photos du même club à la suite, sauf si tous les inscrits en attente sont du même club
   - on évite d'abord le club des 2 dernières photos, puis au minimum celui de la dernière

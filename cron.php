@@ -1,8 +1,9 @@
 <?php
 /*
- * Tâche quotidienne : relances, alertes de retard, passage automatique, réparation des chaînes.
- * cPanel o2switch > Tâches Cron, une fois par jour (ex. 9h00) :
- *   php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php
+ * Tâche planifiée : file d'envoi des mails groupés, relances, alertes de retard, passage automatique, réparation des chaînes.
+ * cPanel o2switch > Tâches Cron, toutes les 5 minutes (la file d'envoi part 1 mail par passage) :
+ *   0-59/5 * * * * /usr/local/bin/php /home/VOTRE_COMPTE/cadavreexquis.schwaller.art/cron.php >/dev/null 2>&1
+ * Les relances, alertes et points ne partent qu'une fois (dates enregistrées), même si le cron tourne souvent.
  * ou par URL : https://cadavreexquis.schwaller.art/cron.php?key=VOTRE_CLE
  */
 require __DIR__ . '/inc/bootstrap.php';
@@ -12,6 +13,7 @@ if (PHP_SAPI !== 'cli' && !hash_equals((string) cfg('cron_key'), get('key'))) {
     exit('Accès refusé');
 }
 header('Content-Type: text/plain; charset=utf-8');
+@file_put_contents(DATA_DIR . '/cron_dernier.txt', now());
 
 $log = [];
 $retards = [];
@@ -64,5 +66,8 @@ foreach (q("SELECT c.* FROM chaines c JOIN editions e ON e.id = c.edition_id WHE
     if (chaine_doit_fermer($ch)) { update('chaines', (int) $ch['id'], ['statut' => 'close']); $log[] = "Chaîne {$ch['numero']} terminée"; continue; }
     if ($ch['statut'] === 'active' && avancer_chaine((int) $ch['id'])) $log[] = "Chaîne {$ch['numero']} relancée";
 }
+
+// 6. File d'envoi des mails groupés : quelques mails par passage
+if ($n = traiter_file((int) cfg('cron_mails_par_passage', 1))) $log[] = "$n mail(s) de la file envoyé(s), " . file_en_attente() . ' restant(s)';
 
 echo date('d/m/Y H:i') . " – " . ($log ? implode("\n", $log) : 'rien à faire') . "\n";
