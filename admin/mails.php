@@ -23,14 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $vars = ['prenom' => 'Patrick', 'nom' => 'TEST', 'club' => 'Club test', 'mail' => $a['mail'], 'edition' => edition_admin()['nom'] ?? 'Cadavre Exquis',
                  'delai' => cfg('delai_jours'), 'date_fin' => '', 'site' => url(), 'chaine' => '01',
                  'lien' => url('depot.php?t=exemple'), 'rang' => 4, 'devant' => 3,
-                 'phrase_rang' => 'Il y a encore 3 personnes avant toi.', 'estimation' => 'dans 2 semaines environ', 'nb_photos' => 12, 'nb_chaines' => 6, 'lien_resultats' => url('resultats.php?k=exemple'), 'date_limite' => fdate(plus_jours(now(), (int) cfg('delai_jours'))), 'position' => 3];
+                 'phrase_rang' => 'Il y a encore 3 personnes avant toi.', 'estimation' => 'dans 2 semaines environ', 'nb_photos' => 12, 'nb_chaines' => 6, 'lien_resultats' => url('resultats.php?k=exemple'), 'essai' => 2, 'max_essais' => 3, 'date_limite' => fdate(plus_jours(now(), (int) cfg('delai_jours'))), 'position' => 3];
         $ok = envoyer_mail($a['mail'] ?: cfg('mail.admin'), '[TEST] ' . remplir($mod['sujet'], $vars), remplir($mod['corps'], $vars));
         flash($ok ? 'Mail de test envoyé à ' . ($a['mail'] ?: cfg('mail.admin')) . '.' : 'Échec de l\'envoi : voir le journal ci-dessous.', $ok ? 'ok' : 'ko');
     }
     redirect('mails.php' . ($code ? '#' . $code : ''));
 }
 
-$mods = q("SELECT * FROM modeles_mail ORDER BY CASE code WHEN 'bienvenue' THEN 1 WHEN 'a_toi' THEN 2 WHEN 'relance' THEN 3 WHEN 'merci' THEN 4 WHEN 'file_attente' THEN 5 WHEN 'invitation' THEN 8 WHEN 'resultats' THEN 7 ELSE 6 END")->fetchAll();
+$mods = q("SELECT * FROM modeles_mail ORDER BY CASE code WHEN 'bienvenue' THEN 1 WHEN 'a_toi' THEN 2 WHEN 'relance' THEN 3 WHEN 'merci' THEN 4 WHEN 'file_attente' THEN 5 WHEN 'nouvelle_chance' THEN 5 WHEN 'retire' THEN 5 WHEN 'invitation' THEN 8 WHEN 'resultats' THEN 7 ELSE 6 END")->fetchAll();
 $journal = q('SELECT * FROM journal_mails ORDER BY id DESC LIMIT 150')->fetchAll();
 $file = q("SELECT * FROM file_envoi WHERE statut IN ('attente','erreur') ORDER BY statut DESC, id LIMIT 100")->fetchAll();
 $nb_file = file_en_attente();
@@ -43,7 +43,7 @@ entete('Mails', 'mails');
 ?>
 <h1>Mails automatiques</h1>
 <?php if (cfg('mail.mode') !== 'smtp'): ?><p class="alerte info">Mode « log » : aucun mail n'est réellement envoyé (voir config.php).</p><?php endif ?>
-<p class="petit">Variables : {prenom} {nom} {club} {mail} {edition} {chaine} {position} {lien} {date_limite} {delai} {date_fin} {site} — point file d'attente : {rang} {devant} {phrase_rang} {estimation} {nb_photos} {nb_chaines} — résultats : {lien_resultats}.
+<p class="petit">Variables : {prenom} {nom} {club} {mail} {edition} {chaine} {position} {lien} {date_limite} {delai} {date_fin} {site} — point file d'attente : {rang} {devant} {phrase_rang} {estimation} {nb_photos} {nb_chaines} — résultats : {lien_resultats} — sans réponse : {essai} {max_essais}.
   Les liens sont rendus cliquables automatiquement. Expéditeur : <?= h(cfg('mail.from')) ?>.</p>
 
 <h2 style="margin-top:0">File d'envoi (mails groupés)</h2>

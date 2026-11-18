@@ -19,7 +19,7 @@ $log = [];
 $retards = [];
 $n = now();
 $rel = (int) cfg('relance_jours', 10);
-$auto = (int) cfg('auto_passer_jours', 0);
+$auto = (int) cfg('auto_passer_jours', 2);
 
 $ms = q("SELECT m.* FROM maillons m JOIN chaines c ON c.id = m.chaine_id JOIN editions e ON e.id = c.edition_id
          WHERE m.statut = 'en_cours' ORDER BY m.date_limite")->fetchAll();
@@ -31,9 +31,12 @@ foreach ($ms as $m) {
 
     // 1. Passage automatique au suivant
     if ($auto > 0 && plus_jours($m['date_limite'], $auto) < $n) {
-        passer_maillon($m, "Passé automatiquement ($auto j après la date limite)");
-        $log[] = "Passé automatiquement : $qui";
-        mail_admin('Passage automatique', "$qui n'a pas déposé sa photo : la chaîne est passée au participant suivant.\n" . url('admin/chaine.php?id=' . $ch['id']));
+        $r = passer_maillon($m, "Sans réponse ($auto j après la date limite)");
+        $log[] = "Sans réponse : $qui " . ($r === 'remis' ? 'remis en liste d\'attente' : 'retiré du cadavre');
+        mail_admin('Sans réponse', "$qui n'a pas déposé sa photo : la chaîne est passée au participant suivant.\n"
+            . ($r === 'remis' ? "Il/elle est remis(e) en fin de liste d'attente pour une autre chaîne (essai " . (participant((int) $p['id'])['sans_reponse'] + 1) . ' sur ' . (int) cfg('max_chances', 3) . ').'
+                              : 'Sans réponse après ' . (int) cfg('max_chances', 3) . ' essais : retiré(e) du cadavre.')
+            . "\n" . url('admin/chaine.php?id=' . $ch['id']));
         continue;
     }
     // 2. Relance à J+N
@@ -64,7 +67,8 @@ foreach (q("SELECT * FROM editions WHERE statut = 'en_cours'")->fetchAll() as $e
 foreach (q("SELECT c.* FROM chaines c JOIN editions e ON e.id = c.edition_id WHERE e.statut = 'en_cours' AND c.statut <> 'close'")->fetchAll() as $ch) {
     if (qv("SELECT COUNT(*) FROM maillons WHERE chaine_id = ? AND statut = 'en_cours'", [$ch['id']])) continue;
     if (chaine_doit_fermer($ch)) { update('chaines', (int) $ch['id'], ['statut' => 'close']); $log[] = "Chaîne {$ch['numero']} terminée"; continue; }
-    if ($ch['statut'] === 'active' && avancer_chaine((int) $ch['id'])) $log[] = "Chaîne {$ch['numero']} relancée";
+    // chaîne active sans participant, ou chaîne en attente alors que quelqu'un est revenu en liste d'attente
+    if (avancer_chaine((int) $ch['id'])) $log[] = "Chaîne {$ch['numero']} relancée";
 }
 
 // 6. File d'envoi des mails groupés : quelques mails par passage

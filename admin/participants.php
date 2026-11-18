@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('Mail de bienvenue envoyé.');
                 break;
             case 'remettre':
-                update('participants', (int) $p['id'], ['statut' => 'attente', 'date_inscription' => now()]);
+                update('participants', (int) $p['id'], ['statut' => 'attente', 'date_attente' => now(), 'sans_reponse' => 0]);
                 placer_si_chaine_en_attente(participant((int) $p['id']));
                 flash('Remis en fin de liste d\'attente.');
                 break;
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $edit = get('edit') ? participant((int) get('edit')) : null;
 $liste = q("SELECT p.*, m.position, m.statut AS m_statut, c.numero, c.id AS chaine_id
-            FROM participants p LEFT JOIN maillons m ON m.participant_id = p.id LEFT JOIN chaines c ON c.id = m.chaine_id
+            FROM participants p LEFT JOIN maillons m ON m.id = (SELECT MAX(id) FROM maillons WHERE participant_id = p.id) LEFT JOIN chaines c ON c.id = m.chaine_id
             WHERE p.edition_id = ? ORDER BY p.nom, p.prenom", [$eid])->fetchAll();
 $clubs = q('SELECT club, COUNT(*) n FROM participants WHERE edition_id = ? GROUP BY club ORDER BY club', [$eid])->fetchAll();
 $tous_clubs = clubs_actifs();
@@ -126,7 +126,7 @@ entete('Participants', 'participants');
 <tr data-t="<?= h(mb_strtolower($p['nom'] . ' ' . $p['prenom'] . ' ' . $p['club'] . ' ' . $p['mail'])) ?>">
   <td><strong><?= h($p['nom']) ?></strong></td><td><?= h($p['prenom']) ?></td><td><?= h($p['club']) ?></td>
   <td><?= h($p['mail']) ?><?= $p['remarque'] ? '<br><span class="petit">' . h($p['remarque']) . '</span>' : '' ?></td>
-  <td><?= $p['m_statut'] ? badge($p['m_statut']) : badge($p['statut']) ?></td>
+  <td><?= $p['m_statut'] ? badge($p['m_statut']) : badge($p['statut']) ?><?= (int) ($p['sans_reponse'] ?? 0) ? ' <span class="petit">' . (int) $p['sans_reponse'] . ' sans réponse</span>' : '' ?></td>
   <td><?= $p['numero'] ? '<a href="chaine.php?id=' . $p['chaine_id'] . '">' . h($p['numero']) . '</a> · n°' . $p['position'] : '' ?></td>
   <td><?= fdate($p['date_inscription']) ?></td>
   <td>

@@ -30,8 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('Délai prolongé.');
                 break;
             case 'passer':
-                passer_maillon($m, post('note') ?: 'Passé par l\'administrateur');
-                flash($p['prenom'] . ' ' . $p['nom'] . ' passé(e) ; la chaîne continue.');
+                $r = passer_maillon($m, post('note') ?: 'Sans réponse', 'sans_reponse');
+                flash($p['prenom'] . ' ' . $p['nom'] . ($r === 'remis' ? ' remis(e) en fin de liste d\'attente pour une autre chaîne (prévenu(e) par mail)' : ' retiré(e) du cadavre après ' . (int) cfg('max_chances', 3) . ' essais') . ' ; la chaîne continue.');
+                break;
+            case 'retirer':
+                passer_maillon($m, post('note') ?: 'Retiré par l\'administrateur', 'retirer');
+                flash($p['prenom'] . ' ' . $p['nom'] . ' retiré(e) du cadavre ; la chaîne continue.');
                 break;
             case 'deposer': // photo reçue par mail : l'admin la dépose à la place du participant
                 deposer_photo($m, $_FILES['photo'] ?? []);
@@ -80,7 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $ms = maillons_chaine((int) $ch['id']);
 $en_cours = (bool) array_filter($ms, fn($m) => $m['statut'] === 'en_cours');
-$attente = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY date_inscription", [$ch['edition_id']])->fetchAll();
+$attente = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente'
+    AND id NOT IN (SELECT participant_id FROM maillons WHERE chaine_id = ?) ORDER BY COALESCE(date_attente, date_inscription)", [$ch['edition_id'], $ch['id']])->fetchAll();
 
 entete('Chaîne ' . $ch['numero'], 'index');
 ?>
@@ -126,8 +131,11 @@ entete('Chaîne ' . $ch['numero'], 'index');
     <form method="post"><?= csrf_field() ?><input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="relancer"><button class="btn petit sec">Relancer</button></form>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="prolonger"><input type="hidden" name="jours" value="7"><button class="btn petit sec">+7 j</button></form>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="renvoyer"><button class="btn petit sec" title="Renvoyer le mail avec le lien">Renvoyer lien</button></form>
-    <form method="post" onsubmit="this.note.value = prompt('Raison (facultatif) :', 'Pas de réponse') ?? ''; return confirm('Passer ce participant et envoyer au suivant ?')"><?= csrf_field() ?>
-      <input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="passer"><input type="hidden" name="note"><button class="btn petit danger">Passer</button></form>
+    <form method="post" onsubmit="return confirm('Sortir ce participant de la chaîne (sans réponse) ? Il sera remis en liste d\'attente pour une autre chaîne, ou retiré s\'il en est à son dernier essai.')"><?= csrf_field() ?>
+      <input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="passer"><button class="btn petit danger" title="Remis en liste d'attente pour une autre chaîne (essai <?= (int) $m['sans_reponse'] + 2 ?>/<?= (int) cfg('max_chances', 3) ?>)">Passer (autre chaîne)</button></form>
+    <form method="post" onsubmit="this.note.value = prompt('Raison (facultatif) :', '') ?? ''; return confirm('Retirer définitivement ce participant du cadavre ?')"><?= csrf_field() ?>
+      <input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="retirer"><input type="hidden" name="note"><button class="btn petit danger">Retirer</button></form>
+    <?php if ((int) $m['sans_reponse'] > 0): ?><br><span class="petit">Essai <?= (int) $m['sans_reponse'] + 1 ?>/<?= (int) cfg('max_chances', 3) ?></span><?php endif ?>
     <form method="post" enctype="multipart/form-data" style="display:block;margin-top:6px"><?= csrf_field() ?>
       <input type="hidden" name="maillon" value="<?= $m['id'] ?>"><input type="hidden" name="action" value="deposer"><input type="hidden" name="accord" value="1">
       <input type="file" name="photo" accept="image/*" required style="width:200px;padding:3px"> <button class="btn petit">Déposer pour lui</button></form>

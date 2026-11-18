@@ -142,6 +142,26 @@ Tu peux les regarder en diaporama (bouton « Diaporama ») ou les enregistrer en
 Merci d'avoir joué le jeu, et à l'année prochaine !
 
 Patrick"],
+        'nouvelle_chance' => ['Sans réponse : replacé plus tard', 'Cadavre exquis : ta photo n\'est pas arrivée à temps',
+"Bonjour {prenom},
+
+Nous n'avons pas reçu ta photo pour la chaîne {chaine} avant la date limite : pour ne pas bloquer les autres participants, la chaîne a continué sans toi.
+
+Pas d'inquiétude, tu restes inscrit(e) au {edition} : tu recevras plus tard la photo d'une autre chaîne (essai {essai} sur {max_essais}).
+Pense à vérifier tes courriers indésirables et à ajouter cette adresse à tes contacts.
+
+Si tu préfères ne plus participer, réponds simplement à ce mail.
+
+Patrick"],
+        'retire' => ['Sans réponse : retiré du cadavre', 'Cadavre exquis : on te retire de la liste',
+"Bonjour {prenom},
+
+Sans nouvelles de ta part après {max_essais} propositions de photo, nous t'avons retiré(e) du {edition} pour que les chaînes continuent d'avancer.
+
+Si c'est une erreur ou si tu veux revenir, réponds simplement à ce mail.
+Merci et à une prochaine fois !
+
+Patrick"],
         'fin' => ['Cadavre terminé', 'Le {edition} est terminé !',
 "Bonjour {prenom},
 
@@ -170,6 +190,8 @@ function assurer_schema(): void
     try { db()->exec('ALTER TABLE editions ADD COLUMN resultats_token VARCHAR(64) NULL'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE editions ADD COLUMN resultats_publies INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
     try { db()->exec('ALTER TABLE participants ADD COLUMN mail_resultats INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE participants ADD COLUMN sans_reponse INT NOT NULL DEFAULT 0'); } catch (Throwable $e) {}
+    try { db()->exec('ALTER TABLE participants ADD COLUMN date_attente DATETIME NULL'); } catch (Throwable $e) {}
 
     // Liste des clubs : préremplie la première fois, puis complétée avec les clubs déjà saisis
     if (!(int) qv('SELECT COUNT(*) FROM clubs')) {

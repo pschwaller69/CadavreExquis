@@ -152,7 +152,7 @@ entete('Tableau de bord', 'index');
 <?php if ($attente): ?>
 <table class="liste"><tr><th>#</th><th>Nom</th><th>Prénom</th><th>Club</th><th>Mail</th><th>Inscrit le</th><th>Tour estimé</th><th>Dernier point</th></tr>
 <?php foreach ($attente as $p): ?>
-  <tr><td><?= $p['rang'] ?></td><td><?= h($p['nom']) ?></td><td><?= h($p['prenom']) ?></td><td><?= h($p['club']) ?></td><td><?= h($p['mail']) ?></td><td><?= fdate($p['date_inscription']) ?></td>
+  <tr><td><?= $p['rang'] ?></td><td><?= h($p['nom']) ?></td><td><?= h($p['prenom']) ?><?= (int) $p['sans_reponse'] ? ' ' . badge('attente', 'essai ' . ((int) $p['sans_reponse'] + 1)) : '' ?></td><td><?= h($p['club']) ?></td><td><?= h($p['mail']) ?></td><td><?= fdate($p['date_inscription']) ?></td>
     <td><?= h(texte_estimation($p['jours_estimes'])) ?></td><td><?= fdate($p['dernier_point'] ?? null) ?></td></tr>
 <?php endforeach ?></table>
 <?php else: ?><p class="petit">Personne en attente.</p><?php endif ?>

@@ -10,7 +10,7 @@ if ($m && $_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     try {
         if (post('action') === 'desister') {
-            passer_maillon($m, 'Désistement du participant');
+            passer_maillon($m, 'Désistement du participant', 'retirer');
             mail_admin('Désistement', "Désistement via le lien de dépôt (maillon #{$m['id']}). La chaîne a continué automatiquement.");
         } else {
             if (!post('accord')) throw new RuntimeException('Merci de cocher l\'accord de diffusion.');

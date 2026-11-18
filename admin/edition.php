@@ -122,7 +122,8 @@ entete($nouvelle ? 'Nouvelle édition' : 'Édition', 'edition');
   <ul class="petit">
     <li>À l'inscription : mail de bienvenue, puis placement immédiat si une chaîne attend quelqu'un.</li>
     <li>Au dépôt d'une photo : mail de remerciement et envoi au suivant de la liste d'attente (en évitant le club des 2 derniers maillons).</li>
-    <li>Délai : <?= (int) cfg('delai_jours') ?> jours, relance à J+<?= (int) cfg('relance_jours') ?>, alerte à l'administrateur à l'échéance<?= cfg('auto_passer_jours') ? ', passage automatique au suivant ' . (int) cfg('auto_passer_jours') . ' j après' : '' ?>.</li>
+    <li>Délai : <?= (int) cfg('delai_jours') ?> jours, relance à J+<?= (int) cfg('relance_jours') ?>, alerte à l'administrateur à l'échéance<?= cfg('auto_passer_jours', 2) ? ', sortie de la chaîne ' . (int) cfg('auto_passer_jours', 2) . ' j après sans photo' : '' ?>.</li>
+    <li>Sans réponse : remis en fin de liste d'attente pour une autre chaîne, <?= (int) cfg('max_chances', 3) ?> essais au total, puis retiré du cadavre (mail à chaque fois).</li>
     <li>Une chaîne se termine à la date de dernier envoi, au nombre max de photos, ou à la clôture.</li>
   </ul>
 </div>

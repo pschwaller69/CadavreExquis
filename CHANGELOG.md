@@ -3,6 +3,15 @@
 La version en ligne s'affiche en haut à droite de l'admin, en pied de page
 (avec le commit et la date du déploiement) et sur https://cadavreexquis.schwaller.art/version.php
 
+## 1.14.0 – 18/11/2026
+- **3 chances** : sans photo 2 jours après la date limite (`auto_passer_jours`), le participant sort de sa chaîne
+  (qui continue avec le suivant) et est remis en fin de liste d'attente pour une **autre** chaîne ;
+  au 3e essai sans réponse (`max_chances`) il est retiré du cadavre. Un mail le prévient à chaque fois,
+  l'admin aussi. Un participant n'est jamais renvoyé dans une chaîne où il a déjà été.
+- Page chaîne : « Passer (autre chaîne) » applique cette règle, « Retirer » sort définitivement
+- « Je ne peux pas participer » retire tout de suite
+- Les chaînes en attente reprennent automatiquement un participant revenu en liste d'attente
+
 ## 1.13.0 – 18/11/2026
 - Dépôt : question obligatoire « photo réalisée pour l'occasion / photo d'archive », affichée dans la présentation
   (au-dessus de la démarche), sur la page de la chaîne (modifiable) et dans l'export CSV

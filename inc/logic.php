@@ -31,7 +31,7 @@ function participant(int $id): ?array { return q1('SELECT * FROM participants WH
 
 function maillons_chaine(int $chaine_id): array
 {
-    return q('SELECT m.*, p.nom, p.prenom, p.mail, p.club FROM maillons m JOIN participants p ON p.id = m.participant_id
+    return q('SELECT m.*, p.nom, p.prenom, p.mail, p.club, p.sans_reponse FROM maillons m JOIN participants p ON p.id = m.participant_id
               WHERE m.chaine_id = ? ORDER BY m.position', [$chaine_id])->fetchAll();
 }
 
@@ -177,7 +177,9 @@ function conflit_club(?string $club, array $voisins): int
  */
 function choisir_suivant(array $chaine): ?array
 {
-    $cands = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY date_inscription, id", [$chaine['edition_id']])->fetchAll();
+    $cands = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente'
+                    AND id NOT IN (SELECT participant_id FROM maillons WHERE chaine_id = ?)
+                  ORDER BY COALESCE(date_attente, date_inscription), id", [$chaine['edition_id'], $chaine['id']])->fetchAll();
     if (!$cands) return null;
     $voisins = clubs_voisins((int) $chaine['id']);
     foreach ([0, 1] as $tolere) {
@@ -301,12 +303,36 @@ function deposer_photo(array $m, array $file): void
 }
 
 /** Abandon / dépassement : on saute ce participant, le suivant reçoit la dernière photo rendue. */
-function passer_maillon(array $m, string $raison = ''): void
+/**
+ * Sortir un participant de sa chaîne (la chaîne continue avec le suivant).
+ * $mode : 'sans_reponse' -> remis en fin de liste d'attente pour une autre chaîne, jusqu'à max_chances essais,
+ *                           puis retiré du cadavre (un mail le prévient dans les deux cas) ;
+ *         'retirer'      -> retiré du cadavre tout de suite (désistement, décision de l'admin), sans mail.
+ * Retourne 'remis' ou 'retire'.
+ */
+function passer_maillon(array $m, string $raison = '', string $mode = 'sans_reponse'): string
 {
-    if ($m['statut'] !== 'en_cours') return;
+    if ($m['statut'] !== 'en_cours') return '';
     update('maillons', (int) $m['id'], ['statut' => 'passe', 'date_retour' => now(), 'note' => $raison ?: null]);
-    update('participants', (int) $m['participant_id'], ['statut' => 'abandon']);
+    $p = participant((int) $m['participant_id']);
+    $max = max(1, (int) cfg('max_chances', 3));
+    $resultat = 'retire';
+    if ($mode === 'sans_reponse') {
+        $essais = (int) $p['sans_reponse'] + 1;
+        $vars = vars_mail($p, $m) + ['essai' => $essais + 1, 'max_essais' => $max];
+        if ($essais < $max) {
+            update('participants', (int) $p['id'], ['statut' => 'attente', 'sans_reponse' => $essais, 'date_attente' => now()]);
+            envoyer_modele('nouvelle_chance', $p['mail'], $vars, $p['prenom'] . ' ' . $p['nom']);
+            $resultat = 'remis';
+        } else {
+            update('participants', (int) $p['id'], ['statut' => 'abandon', 'sans_reponse' => $essais]);
+            envoyer_modele('retire', $p['mail'], $vars, $p['prenom'] . ' ' . $p['nom']);
+        }
+    } else {
+        update('participants', (int) $p['id'], ['statut' => 'abandon']);
+    }
     avancer_chaine((int) $m['chaine_id']);
+    return $resultat;
 }
 
 /** Démarre l'édition : chaque chaîne sans maillon en cours reçoit un participant. */
@@ -338,7 +364,7 @@ function duree_moyenne_maillon(int $edition_id): float
  */
 function file_attente(int $edition_id): array
 {
-    $file = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY date_inscription, id", [$edition_id])->fetchAll();
+    $file = q("SELECT * FROM participants WHERE edition_id = ? AND statut = 'attente' ORDER BY COALESCE(date_attente, date_inscription), id", [$edition_id])->fetchAll();
     $nb_ch = max(1, (int) qv("SELECT COUNT(*) FROM chaines WHERE edition_id = ? AND statut <> 'close'", [$edition_id]));
     $duree = duree_moyenne_maillon($edition_id);
     foreach ($file as $i => &$p) {

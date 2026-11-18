@@ -36,7 +36,8 @@ return [
     'delai_jours'        => 14, // délai pour rendre sa photo
     'relance_jours'      => 10, // relance automatique à J+10
     'point_attente_jours' => 14, // mail « il reste N personnes avant toi » tous les N jours (0 = jamais)
-    'auto_passer_jours'  => 0,  // 0 = jamais ; sinon passe automatiquement au suivant N jours après la date limite
+    'auto_passer_jours'  => 2,  // sans photo N jours après la date limite : sorti de la chaîne (0 = jamais, l'admin décide)
+    'max_chances'        => 3,  // nombre d'essais : sans réponse, remis en liste d'attente pour une autre chaîne, puis retiré
 
     // Photos
     'upload_max_mo'      => 30,
